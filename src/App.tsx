@@ -1,5 +1,5 @@
 import './App.css'
-import TodoContainer from "./feature/todo/todoContainer.tsx";
+import TodoContainer from "./features/todo/todoContainer.tsx";
 
 function App() {
 
