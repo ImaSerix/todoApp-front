@@ -13,9 +13,10 @@ interface iTodoProps extends Omit<iTodo, 'tasks' | 'idInDb'> {
     onToggleTaskStatus: (taskId:number) => void,
     onUpdateTaskText: (taskId:number, text: string) => void,
     onAddTask: (todoId: number) => void,
+    onRemoveTask: (taskId: number) => void,
 }
 
-const Todo = ({ id, title, tasks, editMode, onToggleEditMode, onToggleTaskStatus, onUpdateTaskText, onAddTask}: iTodoProps) => {
+const Todo = ({ id, title, tasks, editMode, onToggleEditMode, onToggleTaskStatus, onUpdateTaskText, onAddTask, onRemoveTask}: iTodoProps) => {
 
     const [completed, setCompleted] = useState(true);
 
@@ -40,7 +41,8 @@ const Todo = ({ id, title, tasks, editMode, onToggleEditMode, onToggleTaskStatus
                        key={task.id}
                        editMode={editMode}
                        onToggleTaskStatus={(taskId: number) => onToggleTaskStatus(taskId)}
-                       onUpdateTaskText={(taskId: number, text: string) => onUpdateTaskText(taskId, text)}/>
+                       onUpdateTaskText={(taskId: number, text: string) => onUpdateTaskText(taskId, text)}
+                       onRemoveTask={onRemoveTask}/>
                 ))}
             {editMode?<button className={'tasks__button-add'} onClick={() => onAddTask(id)} >+</button>: ''}
         </div>

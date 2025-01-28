@@ -1,0 +1,25 @@
+.Todo-container{
+    padding:10px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+}
+
+.Todo-container__button-add{
+    width: fit-content;
+    padding: 10px 15px;
+    border: 2px solid gray;
+    background-color: transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.Todo-container__button-add:hover{
+    background-color: lightgray;
+}
+
+.Todo-list{
+    display: grid;
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
+}

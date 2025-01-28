@@ -3,6 +3,9 @@ import Todo from "./todo.tsx";
 
 // import  {FC} from "react";
 
+// todo теоретически можно попробовать наследовать Props, или всё таки как-то объединить пропсы в одни объекты, по типу todoProps,
+//  todoTaskProps - дабы было легче опракидывать props, да и таким образом уменьшится повторение
+
 interface iTodoListProps {
     todos: { [p: number]: iTodo },
     tasks: { [p: number]: iTask },
@@ -11,6 +14,7 @@ interface iTodoListProps {
     onUpdateTaskText: (taskId: number, text: string) => void,
     onAddTodo: () => void,
     onAddTask: (todoId: number) => void,
+    onRemoveTask: (taskId: number) => void,
 }
 
 const TodoList = ({
@@ -21,10 +25,11 @@ const TodoList = ({
                       onToggleEditMode,
                       onAddTodo,
                       onAddTask,
+                      onRemoveTask,
                   }: iTodoListProps) => {
 
-    return <div className={'todo-container'}>
-        <div className={'todo-list'}>
+    return <div className={'Todo-container'}>
+        <div className={'Todo-list'}>
             {
                 Object.keys(todos).map((taskId) => {
                     const numericTaskId = Number(taskId);
@@ -37,11 +42,12 @@ const TodoList = ({
                                  onToggleEditMode={onToggleEditMode}
                                  onToggleTaskStatus={onToggleTaskStatus}
                                  onUpdateTaskText={onUpdateTaskText}
-                                 onAddTask={onAddTask}/>
+                                 onAddTask={onAddTask}
+                                 onRemoveTask={onRemoveTask}/>
                 })
             }
         </div>
-        <button className={'button-add'} onClick={onAddTodo}>{'Add new Todo'}</button>
+        <button className={'Todo-container__button-add'} onClick={onAddTodo}>{'Add new Todo'}</button>
     </div>
 }
 export default TodoList;

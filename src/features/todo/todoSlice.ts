@@ -51,6 +51,8 @@ export const enum todoSliceErrors {
     NO_SUCH_TODO,
 }
 
+// todo что-то подумать с этими payload, они как бы надо, но нет
+
 interface idPayload {
     id: number,
 }
@@ -67,6 +69,8 @@ const todoSlice = createSlice({
     name: 'todo',
     initialState,
     reducers: {
+        // todo - не давать оставить todo без task, иначе удалять автоматически, но не знаю такую функциональность можно
+        //  реализовать и в самих компонентах, хотя мб это не совсем правильно, но и тут как бы нельзя
         toggleTodoEditMode: (state, action: PayloadAction<idPayload>) => {
             const todo = state.todos.data[action.payload.id];
             if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.id}'`, todoSliceErrors.NO_SUCH_TODO);
@@ -79,6 +83,7 @@ const todoSlice = createSlice({
 
             task.completed = !task.completed;
         },
+        // todo - не давать оставлять пустым, по аналогии с todo
         updateTaskText: (state, action: PayloadAction<idTextPayload>) => {
             const task = state.tasks.data[action.payload.id];
             if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.id}'`, todoSliceErrors.NO_SUCH_TASK);
@@ -150,7 +155,6 @@ const todoSlice = createSlice({
     }
 })
 export const {
-
     toggleTodoEditMode,
     toggleTaskStatus,
     updateTaskText,
