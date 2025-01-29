@@ -1,26 +1,26 @@
 import {iTask} from "./types.ts";
 import {ChangeEvent} from "react";
+import {iTaskHandlers} from "./todoContainer.tsx";
 // Todo - оформить
 
 
 
-interface iTaskProps extends Omit <iTask, 'todoId' | 'idInDb'>{
-    onToggleTaskStatus: (taskId: number) => void,
-    onUpdateTaskText: (taskId: number, text: string) => void,
-    onRemoveTask: (taskId: number) => void,
+interface iTaskProps{
+    task: iTask,
+    taskHandlers:iTaskHandlers,
     editMode: boolean,
 }
 
-const Task = ({ id, text, completed, onToggleTaskStatus, onUpdateTaskText, editMode, onRemoveTask }: iTaskProps) => {
+const Task = ({ task, taskHandlers, editMode}: iTaskProps) => {
 
     const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-        onUpdateTaskText(id, e.target.value);
+        taskHandlers.handleTaskTextUpdate(task.id, e.target.value);
     }
 
     return <div className="task">
-        <input type={'task__text'} value={text} onChange={handleTextChange} readOnly={!editMode}></input>
-        <input className={'task__checkBox'} type={'checkbox'} onChange={() => onToggleTaskStatus (id)} checked={completed}/>
-        <button className={'task__button-remove'} onClick={()=> onRemoveTask(id)} hidden={!editMode}>X</button>
+        <input type={'task__text'} value={task.text} onChange={handleTextChange} readOnly={!editMode}></input>
+        <input className={'task__checkBox'} type={'checkbox'} onChange={() => taskHandlers.handleTaskStatusToggle(task.id)} checked={task.completed}/>
+        <button className={'task__button-remove'} onClick={()=> taskHandlers.handleRemoveTask(task.id)} hidden={!editMode}>X</button>
     </div>
 }
 

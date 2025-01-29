@@ -1,22 +1,21 @@
 import Task from "./task.tsx";
 import {iTask, iTodo} from "./types.ts";
 import {useEffect, useState} from "react";
+import {iTaskHandlers, iTodoHandlers} from "./todoContainer.tsx";
 
-// Todo - добавить совзможность редактировать title
+// Todo - добавить возможность редактировать title
 //      - оформить, выделять edit-mode
 //      - добавить возможность удалять
 
 
-interface iTodoProps extends Omit<iTodo, 'tasks' | 'idInDb'> {
+interface iTodoProps {
+    todo: iTodo,
     tasks: iTask[],
-    onToggleEditMode: (todoId:number) => void,
-    onToggleTaskStatus: (taskId:number) => void,
-    onUpdateTaskText: (taskId:number, text: string) => void,
-    onAddTask: (todoId: number) => void,
-    onRemoveTask: (taskId: number) => void,
+    todoHandlers:Omit <iTodoHandlers, 'handleAddTodo'>,
+    taskHandlers:iTaskHandlers,
 }
 
-const Todo = ({ id, title, tasks, editMode, onToggleEditMode, onToggleTaskStatus, onUpdateTaskText, onAddTask, onRemoveTask}: iTodoProps) => {
+const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
 
     const [completed, setCompleted] = useState(true);
 
@@ -31,22 +30,18 @@ const Todo = ({ id, title, tasks, editMode, onToggleEditMode, onToggleTaskStatus
         setCompleted (isTodoCompleted);
     },[tasks]);
 
-    return <div className={`todo ${completed ? "completed" : ""} ${editMode ? "edit-mode" : ""} `.trim()}>
-        <h3>{title}</h3>
+    return <div className={`todo ${completed ? "completed" : ""} ${todo.editMode ? "edit-mode" : ""} `.trim()}>
+        <h3>{todo.title}</h3>
         <div className="tasks">
             {tasks.map((task: iTask) =>
-                (<Task id={task.id}
-                       text={task.text}
-                       completed={task.completed}
+                (<Task task = {task}
                        key={task.id}
-                       editMode={editMode}
-                       onToggleTaskStatus={(taskId: number) => onToggleTaskStatus(taskId)}
-                       onUpdateTaskText={(taskId: number, text: string) => onUpdateTaskText(taskId, text)}
-                       onRemoveTask={onRemoveTask}/>
+                       editMode={todo.editMode}
+                       taskHandlers={taskHandlers}/>
                 ))}
-            {editMode?<button className={'tasks__button-add'} onClick={() => onAddTask(id)} >+</button>: ''}
+            {todo.editMode?<button className={'tasks__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)} >+</button>: ''}
         </div>
-        <button onClick={()=>onToggleEditMode(id)}>Edit</button>
+        <button onClick={()=>todoHandlers.handleEditModeToggle(todo.id)}>Edit</button>
     </div>
 }
 
