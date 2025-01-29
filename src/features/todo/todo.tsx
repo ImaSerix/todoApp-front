@@ -1,11 +1,9 @@
 import Task from "./task.tsx";
 import {iTask, iTodo} from "./types.ts";
-import {useEffect, useState} from "react";
+import {ChangeEvent, useEffect, useState} from "react";
 import {iTaskHandlers, iTodoHandlers} from "./todoContainer.tsx";
 
-// Todo - добавить возможность редактировать title
-//      - оформить, выделять edit-mode
-//      - добавить возможность удалять
+// Todo - оформить, выделять edit-mode
 
 
 interface iTodoProps {
@@ -30,8 +28,12 @@ const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
         setCompleted (isTodoCompleted);
     },[tasks]);
 
+    const handleTitleTextChange = (e:ChangeEvent<HTMLInputElement>) =>{
+        todoHandlers.handleTodoTitleTextUpdate(todo.id, e.target.value);
+    }
+
     return <div className={`todo ${completed ? "completed" : ""} ${todo.editMode ? "edit-mode" : ""} `.trim()}>
-        <h3>{todo.title}</h3>
+        <input onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
         <div className="tasks">
             {tasks.map((task: iTask) =>
                 (<Task task = {task}
@@ -41,7 +43,8 @@ const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
                 ))}
             {todo.editMode?<button className={'tasks__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)} >+</button>: ''}
         </div>
-        <button onClick={()=>todoHandlers.handleEditModeToggle(todo.id)}>Edit</button>
+        <button onClick={()=>todoHandlers.handleEditModeToggle(todo.id)}>{todo.editMode? 'Save':'Edit'}</button>
+        <button onClick={()=>todoHandlers.handleRemoveTodo(todo.id)}>Delete</button>
     </div>
 }
 

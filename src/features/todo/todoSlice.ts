@@ -49,9 +49,10 @@ const initialState: iTodoState = {
 export const enum todoSliceErrors {
     NO_SUCH_TASK,
     NO_SUCH_TODO,
+    TODO_IS_EMPTY,
+    TODO_TITLE_IS_EMPTY,
+    TASK_TEXT_IS_EMPTY,
 }
-
-// todo что-то подумать с этими payload, они как бы надо, но нет
 
 interface taskIdPayload {
     taskId: number,
@@ -73,11 +74,21 @@ const todoSlice = createSlice({
     name: 'todo',
     initialState,
     reducers: {
-        // todo - не давать оставить todo без task, иначе удалять автоматически, но не знаю такую функциональность можно
-        //  реализовать и в самих компонентах, хотя мб это не совсем правильно, но и тут как бы нельзя
         toggleTodoEditMode: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
             if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
+
+            // Проверки перед отключением:
+            //  - Чтоб title не был пустой
+            //  - Чтоб был хоть один task
+            //  - Чтоб task был с текстом
+
+            if (todo.tasks.length == 0) throw new ErrorWithCode<todoSliceErrors>(`Todo must have at least one task!`, todoSliceErrors.TODO_IS_EMPTY);
+            if (todo.title.trim() == '') throw new ErrorWithCode<todoSliceErrors>(`Title mustn't be empty!`, todoSliceErrors.TODO_TITLE_IS_EMPTY);
+
+            for (const taskId of todo.tasks){
+                if (state.tasks.data[taskId].text.trim() == '') throw new ErrorWithCode<todoSliceErrors>(`Task text mustn't be empty!`, todoSliceErrors.TASK_TEXT_IS_EMPTY);
+            }
 
             todo.editMode = !todo.editMode;
         },
@@ -93,17 +104,15 @@ const todoSlice = createSlice({
 
             task.completed = !task.completed;
         },
-        // todo - не давать оставлять пустым, по аналогии с todo
         updateTaskText: (state, action: PayloadAction<taskIdTextPayload>) => {
             const task = state.tasks.data[action.payload.taskId];
             if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.taskId}'`, todoSliceErrors.NO_SUCH_TASK);
-
             task.text = action.payload.text;
         },
         addTodo: (state) => {
             const todoId = state.todos.nextId;
             state.todos.updated.push(todoId);
-            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: ''};
+            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: 'Unnamed'};
         },
         removeTodo: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
@@ -111,6 +120,10 @@ const todoSlice = createSlice({
 
             state.todos.deleted.push(action.payload.todoId);
             state.tasks.deleted.push(...state.todos.data[action.payload.todoId].tasks);
+            for(const task of todo.tasks){
+                delete state.tasks.data[task];
+            }
+            delete state.todos.data[action.payload.todoId];
         },
         addTask: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
@@ -119,7 +132,7 @@ const todoSlice = createSlice({
             state.todos.data[action.payload.todoId].tasks.push(state.tasks.nextId);
             state.tasks.updated.push(state.tasks.nextId);
             const taskId = state.tasks.nextId;
-            state.tasks.data[state.tasks.nextId++] = {id:taskId, idInDb: null, text: '', completed: false, todoId: action.payload.todoId};
+            state.tasks.data[state.tasks.nextId++] = {id:taskId, idInDb: null, text: 'Unnamed', completed: false, todoId: action.payload.todoId};
         },
         removeTask: (state, action: PayloadAction<taskIdPayload>) => {
             const task = state.tasks.data[action.payload.taskId];
