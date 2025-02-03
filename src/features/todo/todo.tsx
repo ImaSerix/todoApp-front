@@ -34,8 +34,8 @@ const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
 
     //Todo Посмотреть норм ли решение пихать такое в style
     return <div style={{backgroundColor: todo.color}} className={`Todo ${completed ? "Completed" : ""} ${todo.editMode ? "edit-mode" : ""} `.trim()}>
-        <input onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
-        <div className="tasks">
+        <input className={'Todo__title'} onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
+        <div className="Todo__tasks">
             {tasks.map((task: iTask) =>
                 (<Task task = {task}
                        key={task.id}
@@ -44,8 +44,12 @@ const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
                 ))}
             {todo.editMode?<button className={'tasks__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)} >+</button>: ''}
         </div>
-        <button onClick={()=>todoHandlers.handleEditModeToggle(todo.id)}>{todo.editMode? 'Save':'Edit'}</button>
-        <button onClick={()=>todoHandlers.handleRemoveTodo(todo.id)}>Delete</button>
+        <button className={`Todo__button-edit`} onClick={()=>todoHandlers.handleEditModeToggle(todo.id)}>
+            <span className={`${todo.editMode? 'discrete':'pen'}`} />
+        </button>
+        <button className={'Todo__button-delete'} onClick={() => todoHandlers.handleRemoveTodo(todo.id)}>
+            <span className={`bin`}/>
+        </button>
     </div>
 }
 

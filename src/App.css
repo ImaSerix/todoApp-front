@@ -18,7 +18,7 @@
 
 .App-content{
   border: 1px solid gray;
-  padding: 10px;
-  grid-row:2;
-  margin: 0 50px
+  padding: 0.7em;
+  grid-row: 2;
+  margin: 0 50px;
 }
