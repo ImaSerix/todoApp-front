@@ -19,11 +19,13 @@ export interface iTask {
 export type Todo = {
     id: number,
     title: string,
+    color: `#${string}`,
     tasks: Task[],
 }
 
 export interface iTodo {
     id:number,
+    color: `#${string}`,
     idInDb: number | null, //id in db, null if it was created and doesn't synchronize with DB
     title: string,
     tasks: number[], //Front app tasks ids, which given them temporary, before synchronize with DB

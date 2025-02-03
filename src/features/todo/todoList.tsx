@@ -17,9 +17,13 @@ const TodoList = ({
                       taskHandlers
                   }: iTodoListProps) => {
 
+    if (Object.keys(todos).length == 0) {
+    }
+
     return <div className={'Todo-container'}>
         <div className={'Todo-list'}>
             {
+                Object.keys(todos).length == 0? <div>{'Todo list is empty'}</div>:
                 Object.keys(todos).map((taskId) => {
                     const numericTaskId = Number(taskId);
                     const todo = todos[numericTaskId];

@@ -13,6 +13,7 @@ const data: iData = {
         {
             id: 0,
             title: "Some title",
+            color: '#FF000063',
             tasks: [
                 {
                     id: 0,
@@ -37,6 +38,7 @@ const data: iData = {
         {
             id: 1,
             title: "Some title 2",
+            color: '#FFA5007F',
             tasks: [
                 {
                     id: 3,

@@ -32,7 +32,8 @@ const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
         todoHandlers.handleTodoTitleTextUpdate(todo.id, e.target.value);
     }
 
-    return <div className={`todo ${completed ? "completed" : ""} ${todo.editMode ? "edit-mode" : ""} `.trim()}>
+    //Todo Посмотреть норм ли решение пихать такое в style
+    return <div style={{backgroundColor: todo.color}} className={`Todo ${completed ? "Completed" : ""} ${todo.editMode ? "edit-mode" : ""} `.trim()}>
         <input onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
         <div className="tasks">
             {tasks.map((task: iTask) =>

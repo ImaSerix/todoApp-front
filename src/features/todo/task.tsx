@@ -1,7 +1,7 @@
 import {iTask} from "./types.ts";
 import {ChangeEvent} from "react";
 import {iTaskHandlers} from "./todoContainer.tsx";
-// Todo - оформить
+//  Todo - оформить
 
 
 

@@ -112,7 +112,7 @@ const todoSlice = createSlice({
         addTodo: (state) => {
             const todoId = state.todos.nextId;
             state.todos.updated.push(todoId);
-            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: 'Unnamed'};
+            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: 'Unnamed', color:'#FFFFFF'};
         },
         removeTodo: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
@@ -140,7 +140,7 @@ const todoSlice = createSlice({
 
             state.todos.data[task.todoId].tasks = state.todos.data[task.todoId].tasks.filter((taskId) => taskId != action.payload.taskId);
             state.tasks.deleted.push(action.payload.taskId);
-        }
+        },
     },
     extraReducers: builder => {
         builder.addCase(loadData.pending, (state) => {
