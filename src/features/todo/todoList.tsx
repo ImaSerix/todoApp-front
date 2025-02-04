@@ -36,7 +36,9 @@ const TodoList = ({
                 })
             }
         </div>
-        <button className={'todo-container__button-add'} onClick={todoHandlers.handleAddTodo}>{'Add new Todo'}</button>
+        <button className={'todo-container__button-add'} onClick={todoHandlers.handleAddTodo}>
+            <span className={`img-plus`}/>
+        </button>
     </div>
 }
 export default TodoList;

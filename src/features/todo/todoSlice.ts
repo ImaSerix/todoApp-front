@@ -1,17 +1,18 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {todoAPI} from "../../api/todoAPI.ts";
-import {iTask, iTodo} from "./types.ts";
+import {Color, iTask, iTodo} from "./types.ts";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
+import {avaibleColors} from "./avaibleColors.ts";
 
 interface iTodoState {
     todos: {
-        data: {[key: number]: iTodo},
+        data: { [key: number]: iTodo },
         nextId: number,
         updated: number[], //Updated todos id in app
         deleted: number[], //Deleted task id in app
     }
     tasks: {
-        data: {[key: number]: iTask},
+        data: { [key: number]: iTask },
         nextId: number,
         updated: number[], //Updated tasks id in app
         deleted: number[], //Deleted task id in app
@@ -66,6 +67,10 @@ interface todoIdPayload {
     todoId: number,
 }
 
+interface todoIdColorPayload extends todoIdPayload {
+    color: Color,
+}
+
 interface todoIdTextPayload extends todoIdPayload {
     text: string,
 }
@@ -86,13 +91,13 @@ const todoSlice = createSlice({
             if (todo.tasks.length == 0) throw new ErrorWithCode<todoSliceErrors>(`Todo must have at least one task!`, todoSliceErrors.TODO_IS_EMPTY);
             if (todo.title.trim() == '') throw new ErrorWithCode<todoSliceErrors>(`Title mustn't be empty!`, todoSliceErrors.TODO_TITLE_IS_EMPTY);
 
-            for (const taskId of todo.tasks){
+            for (const taskId of todo.tasks) {
                 if (state.tasks.data[taskId].text.trim() == '') throw new ErrorWithCode<todoSliceErrors>(`Task text mustn't be empty!`, todoSliceErrors.TASK_TEXT_IS_EMPTY);
             }
-
+            todo.colorPickerVisible = false;
             todo.editMode = !todo.editMode;
         },
-        updateTodoTitleText: (state, action: PayloadAction<todoIdTextPayload>) =>{
+        updateTodoTitleText: (state, action: PayloadAction<todoIdTextPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
             if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
 
@@ -112,7 +117,15 @@ const todoSlice = createSlice({
         addTodo: (state) => {
             const todoId = state.todos.nextId;
             state.todos.updated.push(todoId);
-            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: 'Unnamed', color:{red: 0, blue: 0, green: 0, opacity:0}};
+            state.todos.data[state.todos.nextId++] = {
+                id: todoId,
+                idInDb: null,
+                editMode: true,
+                colorPickerVisible: false,
+                tasks: [],
+                title: 'Unnamed',
+                color: avaibleColors[Math.floor(Math.random() * avaibleColors.length)],
+            };
         },
         removeTodo: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
@@ -120,10 +133,23 @@ const todoSlice = createSlice({
 
             state.todos.deleted.push(action.payload.todoId);
             state.tasks.deleted.push(...state.todos.data[action.payload.todoId].tasks);
-            for(const task of todo.tasks){
+            for (const task of todo.tasks) {
                 delete state.tasks.data[task];
             }
             delete state.todos.data[action.payload.todoId];
+        },
+        toggleColorPickerVisible: (state, action: PayloadAction<todoIdPayload>) => {
+            const todo = state.todos.data[action.payload.todoId];
+            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
+
+            todo.colorPickerVisible = !todo.colorPickerVisible;
+        },
+        updateTodoColor(state, action: PayloadAction<todoIdColorPayload>) {
+            const todo = state.todos.data[action.payload.todoId];
+            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
+
+            todo.colorPickerVisible = false;
+            todo.color = action.payload.color;
         },
         addTask: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
@@ -132,7 +158,13 @@ const todoSlice = createSlice({
             state.todos.data[action.payload.todoId].tasks.push(state.tasks.nextId);
             state.tasks.updated.push(state.tasks.nextId);
             const taskId = state.tasks.nextId;
-            state.tasks.data[state.tasks.nextId++] = {id:taskId, idInDb: null, text: 'Unnamed', completed: false, todoId: action.payload.todoId};
+            state.tasks.data[state.tasks.nextId++] = {
+                id: taskId,
+                idInDb: null,
+                text: 'Unnamed',
+                completed: false,
+                todoId: action.payload.todoId
+            };
         },
         removeTask: (state, action: PayloadAction<taskIdPayload>) => {
             const task = state.tasks.data[action.payload.taskId];
@@ -164,14 +196,14 @@ const todoSlice = createSlice({
             const {tasks, todos} = action.payload;
 
             state.tasks.nextId = tasks.nextId;
-            state.tasks.data = tasks.data.reduce((acc, task) =>{
-                acc[task.id] = {...task, idInDb:task.id};
+            state.tasks.data = tasks.data.reduce((acc, task) => {
+                acc[task.id] = {...task, idInDb: task.id};
                 return acc;
             }, {} as { [key: number]: iTask });
 
             state.todos.nextId = todos.nextId;
-            state.todos.data = todos.data.reduce((acc, todo) =>{
-                acc[todo.id] = {...todo, idInDb:todo.id, editMode: false, tasks: todo.tasks.map(task => task.id)};
+            state.todos.data = todos.data.reduce((acc, todo) => {
+                acc[todo.id] = {...todo, idInDb: todo.id, editMode: false, colorPickerVisible: false, tasks: todo.tasks.map(task => task.id)};
                 return acc;
             }, {} as { [key: number]: iTodo });
         });
@@ -182,6 +214,8 @@ export const {
     toggleTaskStatus,
     updateTaskText,
     addTodo,
+    toggleColorPickerVisible,
+    updateTodoColor,
     updateTodoTitleText,
     removeTodo,
     addTask,

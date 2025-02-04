@@ -17,7 +17,6 @@
 }
 
 .app__content{
-  border: 1px solid gray;
   padding: 0.7em;
   grid-row: 2;
   margin: 0 50px;

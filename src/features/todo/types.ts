@@ -16,7 +16,7 @@ export interface iTask {
 }
 
 
-type Color = {
+export type Color = {
     red: number,
     green: number,
     blue: number,
@@ -38,5 +38,6 @@ export interface iTodo {
     title: string,
     tasks: number[], //Front app tasks ids, which given them temporary, before synchronize with DB
     editMode: boolean,
+    colorPickerVisible: boolean,
 }
 

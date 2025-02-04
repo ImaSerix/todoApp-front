@@ -10,11 +10,12 @@ import {
     removeTask,
     updateTodoTitleText,
     removeTodo,
-    todoSliceErrors
+    todoSliceErrors, updateTodoColor, toggleColorPickerVisible
 } from "./todoSlice.ts";
-import './todo.css';
+import './todo.scss';
 import TodoList from "./todoList.tsx";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
+import {Color} from "./types.ts";
 
 // todo - оформить всё todo приложение, просто как-нибудь минималистично добавить различные иконки
 
@@ -23,6 +24,8 @@ export interface iTodoHandlers {
     handleAddTodo: () => void,
     handleTodoTitleTextUpdate: (todoId: number, text: string) => void,
     handleRemoveTodo: (todoId: number) => void,
+    handleColorPickerVisibleToggle: (todoId: number) => void,
+    handleTodoColorUpdate: (todoId: number, color: Color) => void,
 }
 
 export interface iTaskHandlers {
@@ -51,8 +54,10 @@ const TodoContainer = () => {
             try {
                 dispatch(toggleTodoEditMode({todoId}))
             } catch (e) {
-                if (e as ErrorWithCode<todoSliceErrors>)
+                if (e as ErrorWithCode<todoSliceErrors>) {
+                    alert((e as ErrorWithCode<todoSliceErrors>).message);
                     console.log((e as ErrorWithCode<todoSliceErrors>).message);
+                }
                 else console.error(e);
             }
         },
@@ -62,6 +67,12 @@ const TodoContainer = () => {
         handleRemoveTodo: (todoId: number) => {
             dispatch(removeTodo({todoId}))
         },
+        handleColorPickerVisibleToggle: (todoId: number) => {
+            dispatch(toggleColorPickerVisible({todoId}))
+        },
+        handleTodoColorUpdate: (todoId: number, color: Color) => {
+            dispatch(updateTodoColor({todoId, color}))
+        }
     }
 
     const taskHandlers: iTaskHandlers = {

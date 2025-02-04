@@ -1,4 +1,5 @@
 import {Todo, Task} from "../features/todo/types.ts";
+import {avaibleColors} from "../features/todo/avaibleColors.ts";
 
 interface iData {
     todos: Todo[],
@@ -13,12 +14,7 @@ const data: iData = {
         {
             id: 0,
             title: "Some title",
-            color: {
-                red: 255,
-                green:0,
-                blue: 0,
-                opacity: 0.8,
-            },
+            color: avaibleColors[1],
             tasks: [
                 {
                     id: 0,
@@ -43,12 +39,7 @@ const data: iData = {
         {
             id: 1,
             title: "Some title 2",
-            color: {
-                red: 125,
-                green:125,
-                blue: 0,
-                opacity: 0.8,
-            },
+            color: avaibleColors[3],
             tasks: [
                 {
                     id: 3,
