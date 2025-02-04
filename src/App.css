@@ -1,10 +1,10 @@
-.App{
+.app{
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 60px auto;
 }
 
-.App-nav{
+.app__nav{
   position: fixed;
   display: grid;
   justify-content: center;
@@ -16,7 +16,7 @@
   background-color: lightgray;
 }
 
-.App-content{
+.app__content{
   border: 1px solid gray;
   padding: 0.7em;
   grid-row: 2;

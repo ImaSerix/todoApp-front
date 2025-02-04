@@ -1,6 +1,6 @@
 import Task from "./task.tsx";
 import {iTask, iTodo} from "./types.ts";
-import {ChangeEvent, useEffect, useState} from "react";
+import {ChangeEvent, CSSProperties, useEffect, useState} from "react";
 import {iTaskHandlers, iTodoHandlers} from "./todoContainer.tsx";
 
 // Todo - оформить, выделять edit-mode
@@ -9,46 +9,52 @@ import {iTaskHandlers, iTodoHandlers} from "./todoContainer.tsx";
 interface iTodoProps {
     todo: iTodo,
     tasks: iTask[],
-    todoHandlers:Omit <iTodoHandlers, 'handleAddTodo'>,
-    taskHandlers:iTaskHandlers,
+    todoHandlers: Omit<iTodoHandlers, 'handleAddTodo'>,
+    taskHandlers: iTaskHandlers,
 }
 
-const Todo = ({ todo, tasks, todoHandlers, taskHandlers }: iTodoProps) => {
+const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
 
     const [completed, setCompleted] = useState(true);
 
-    useEffect(()=>{
+    useEffect(() => {
         let isTodoCompleted = true;
-        for (const task of tasks){
+        for (const task of tasks) {
             if (!task.completed) {
                 isTodoCompleted = false
                 break;
             }
         }
-        setCompleted (isTodoCompleted);
-    },[tasks]);
+        setCompleted(isTodoCompleted);
+    }, [tasks]);
 
-    const handleTitleTextChange = (e:ChangeEvent<HTMLInputElement>) =>{
+    const handleTitleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
         todoHandlers.handleTodoTitleTextUpdate(todo.id, e.target.value);
     }
 
-    //Todo Посмотреть норм ли решение пихать такое в style
-    return <div style={{backgroundColor: todo.color}} className={`Todo ${completed ? "Completed" : ""} ${todo.editMode ? "edit-mode" : ""} `.trim()}>
-        <input className={'Todo__title'} onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
-        <div className="Todo__tasks">
+
+    return <div style={{
+        '--todo-color-red': todo.color.red,
+        '--todo-color-green': todo.color.green,
+        '--todo-color-blue': todo.color.blue,
+        '--todo-color-opacity': todo.color.opacity,
+    } as CSSProperties} className={`todo ${completed ? "todo--completed" : ""} ${todo.editMode ? "todo--edit-mode" : ""} `.trim()}>
+        <input className={'todo__title'} onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
+        <div className="todo__task-list">
             {tasks.map((task: iTask) =>
-                (<Task task = {task}
+                (<Task task={task}
                        key={task.id}
                        editMode={todo.editMode}
                        taskHandlers={taskHandlers}/>
                 ))}
-            {todo.editMode?<button className={'tasks__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)} >+</button>: ''}
         </div>
-        <button className={`Todo__button-edit`} onClick={()=>todoHandlers.handleEditModeToggle(todo.id)}>
-            <span className={`${todo.editMode? 'discrete':'pen'}`} />
+        {todo.editMode ?
+            <button className={'tasks__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)}>+</button> : ''}
+        <button className={`todo__button-edit`} onClick={() => todoHandlers.handleEditModeToggle(todo.id)}>
+            <span className={`${todo.editMode ? 'img-discrete' : 'img-pen'}`}/>
         </button>
-        <button className={'Todo__button-delete'} onClick={() => todoHandlers.handleRemoveTodo(todo.id)}>
-            <span className={`bin`}/>
+        <button className={'todo__button-delete'} onClick={() => todoHandlers.handleRemoveTodo(todo.id)}>
+            <span className={`img-bin`}/>
         </button>
     </div>
 }

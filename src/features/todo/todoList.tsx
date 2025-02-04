@@ -20,8 +20,8 @@ const TodoList = ({
     if (Object.keys(todos).length == 0) {
     }
 
-    return <div className={'Todo-container'}>
-        <div className={'Todo-list'}>
+    return <div className={'todo-container'}>
+        <div className={'todo-list'}>
             {
                 Object.keys(todos).length == 0? <div>{'Todo list is empty'}</div>:
                 Object.keys(todos).map((taskId) => {
@@ -36,7 +36,7 @@ const TodoList = ({
                 })
             }
         </div>
-        <button className={'Todo-container__button-add'} onClick={todoHandlers.handleAddTodo}>{'Add new Todo'}</button>
+        <button className={'todo-container__button-add'} onClick={todoHandlers.handleAddTodo}>{'Add new Todo'}</button>
     </div>
 }
 export default TodoList;

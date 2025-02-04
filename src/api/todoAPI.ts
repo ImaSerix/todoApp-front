@@ -13,7 +13,12 @@ const data: iData = {
         {
             id: 0,
             title: "Some title",
-            color: '#FF000063',
+            color: {
+                red: 255,
+                green:0,
+                blue: 0,
+                opacity: 0.8,
+            },
             tasks: [
                 {
                     id: 0,
@@ -38,7 +43,12 @@ const data: iData = {
         {
             id: 1,
             title: "Some title 2",
-            color: '#FFA5007F',
+            color: {
+                red: 125,
+                green:125,
+                blue: 0,
+                opacity: 0.8,
+            },
             tasks: [
                 {
                     id: 3,

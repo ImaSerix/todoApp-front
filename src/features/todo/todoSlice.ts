@@ -112,7 +112,7 @@ const todoSlice = createSlice({
         addTodo: (state) => {
             const todoId = state.todos.nextId;
             state.todos.updated.push(todoId);
-            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: 'Unnamed', color:'#FFFFFF'};
+            state.todos.data[state.todos.nextId++] = {id:todoId, idInDb: null, editMode: true, tasks: [], title: 'Unnamed', color:{red: 0, blue: 0, green: 0, opacity:0}};
         },
         removeTodo: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];

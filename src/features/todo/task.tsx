@@ -18,9 +18,11 @@ const Task = ({ task, taskHandlers, editMode}: iTaskProps) => {
     }
 
     return <div className="task">
-        <input type={'task__text'} value={task.text} onChange={handleTextChange} readOnly={!editMode}></input>
+        <input className={'task__text'} value={task.text} onChange={handleTextChange} readOnly={!editMode}></input>
         <input className={'task__checkBox'} type={'checkbox'} onChange={() => taskHandlers.handleTaskStatusToggle(task.id)} checked={task.completed}/>
-        <button className={'task__button-remove'} onClick={()=> taskHandlers.handleRemoveTask(task.id)} hidden={!editMode}>X</button>
+        <button className={'task__delete-button'} onClick={()=> taskHandlers.handleRemoveTask(task.id)} hidden={!editMode}>
+            <span className={'img-bin'}></span>
+        </button>
     </div>
 }
 
