@@ -39,8 +39,10 @@ const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
         '--todo-color-blue': todo.color.blue,
         '--todo-color-opacity': todo.color.opacity,
     } as CSSProperties}
-                className={`todo ${completed ? "todo--completed" : ""} ${todo.editMode ? "todo--edit-mode" : ""} `.trim()}>
+                className={`todo ${completed ? "todo--completed " : ""}${todo.editMode ? "todo--edit-mode" : ""} `.trim()}>
+
         <input className={'todo__title'} onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
+
         <div className="todo__task-list">
             {tasks.map((task: iTask) =>
                 (<Task task={task}
@@ -49,20 +51,28 @@ const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
                        taskHandlers={taskHandlers}/>
                 ))}
         </div>
-        {todo.editMode ?
-            <button className={'todo__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)}>+</button> : ''}
-        {todo.editMode ?
-            <button className={'todo__button-color-picker'}
-                    onClick={() => todoHandlers.handleColorPickerVisibleToggle(todo.id)}><span className={`img-color-picker`}/>
-            </button> : ''}
-        {todo.colorPickerVisible ?
-            <ColorPicker colorPicked={(color) => todoHandlers.handleTodoColorUpdate(todo.id, color)}/> : ''}
-        <button className={`todo__button-edit`} onClick={() => todoHandlers.handleEditModeToggle(todo.id)}>
-            <span className={`${todo.editMode ? 'img-discrete' : 'img-pen'}`}/>
-        </button>
-        <button className={'todo__button-delete'} onClick={() => todoHandlers.handleRemoveTodo(todo.id)}>
-            <span className={`img-bin`}/>
-        </button>
+
+        {todo.editMode &&
+            <>
+                <button className={'todo__button-add'} onClick={() => taskHandlers.handleAddTask(todo.id)}>+
+                </button>
+                <button className={'todo__button-color-picker'}
+                        onClick={() => todoHandlers.handleColorPickerVisibleToggle(todo.id)}>
+                    <span className={`img-color-picker`}/>
+                </button>
+            </>}
+
+        {todo.colorPickerVisible &&
+            <ColorPicker colorPicked={(color) => todoHandlers.handleTodoColorUpdate(todo.id, color)}/>}
+
+        <>
+            <button className={`todo__button-edit`} onClick={() => todoHandlers.handleEditModeToggle(todo.id)}>
+                <span className={`${todo.editMode ? 'img-discrete' : 'img-pen'}`}/>
+            </button>
+            <button className={'todo__button-delete'} onClick={() => todoHandlers.handleRemoveTodo(todo.id)}>
+                <span className={`img-bin`}/>
+            </button>
+        </>
     </div>
 }
 
