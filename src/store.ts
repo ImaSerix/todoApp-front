@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import todoReducer from "./features/todo/todoSlice.ts"
+import authReducer from "./features/authentication/authSlice.ts"
 
 export const store = configureStore({
     reducer: {
-        todo: todoReducer
+        todo: todoReducer,
+        auth: authReducer
     },
 })
 
