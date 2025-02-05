@@ -1,25 +1,30 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {authAPI} from "../../api/authAPI.ts";
+import {iUser} from "./types.ts";
 
-interface iAuthState {
-    user:{
-        username: string | null,
-        email: string | null,
-        auth: boolean,
-    }
+export interface iAuthState {
+    user:iUser | null,
+    auth:boolean,
 }
 
 const initialState: iAuthState = {
-    user:{
-        username: null,
-        email: null,
-        auth: false,
-    }
+    user:null,
+    auth: false,
 }
 
-const refreshToken = createAsyncThunk(
-    'auth/refreshToken',
-    async (_, {rejectWithValue}) => {
-        
+
+interface iLoginPayload{
+    email: string,
+    password: string,
+}
+export const login = createAsyncThunk(
+    'auth/login',
+    async (arg:iLoginPayload, thunkAPI) => {
+        const response = await authAPI.login(arg.email, arg.password);
+
+        if (!response.data) thunkAPI.rejectWithValue('Some error');
+
+        return response.data!.user;
     }
 )
 
@@ -28,14 +33,26 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers:{
-        login: (state, action) => void,
-        logout: (state) => void,
-        refreshToken: (state) => void,
+        logout: (state) => {
+            if (state.user){
+                authAPI.logout().then(() => console.log('Successfully logged out'));
+            }
+
+            state.user = null;
+            state.auth = false;
+        },
+    },
+    extraReducers:builder => {
+        builder.addCase(login.fulfilled, (state, action) => {
+            state.user = action.payload;
+            state.auth = true;
+        })
     },
 })
 
-export const {
 
+export const {
+    logout
 } = authSlice.actions;
 
 export default authSlice.reducer;

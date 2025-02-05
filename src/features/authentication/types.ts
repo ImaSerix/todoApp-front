@@ -10,9 +10,8 @@ export type User = {
 export interface iUser{
     id: number,
     username: string,
-    name: string,
+    password: string,
     email: string,
-    auth: boolean,
 }
 
 

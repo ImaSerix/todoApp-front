@@ -1,5 +1,3 @@
-import {browser} from "globals";
-
 
 class TokenManager {
     private static instance: TokenManager | null = null;
@@ -25,6 +23,14 @@ class TokenManager {
     public setTokens(accessToken: string, refreshToken:string): void {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+    }
+
+    // Remove when server will be developed
+    public getAccessToken() {
+        return this.accessToken;
     }
 
     public getAuthHeader() : Record<string, string> {
@@ -32,7 +38,7 @@ class TokenManager {
     }
 
     public renewToken(): void{
-
+        console.log(`Renewing token... using: '${this.refreshToken}'`);
     }
 
 }

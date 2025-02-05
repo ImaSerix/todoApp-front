@@ -1,4 +1,4 @@
-import {RefreshTokens, User} from "../features/authentication/types.ts";
+import {User} from "../features/authentication/types.ts";
 import ErrorWithCode from "../app/ErrorWithCode.ts";
 import TokenManager from "../features/authentication/tokenManager.ts";
 
@@ -70,14 +70,23 @@ const login = async (email: string, password: string): Promise<iLoginPromise> =>
        }
     })
 }
-const logout = (accessToken:string) => {
-    for(const key in Data.accessTokens) {
-        if (Data.accessTokens[key] === accessToken)
-    }
-}
-const refreshAccessToken = () => void;
 
+const logout = async () => {
+
+    const accessToken = TokenManager.getInstance().getAccessToken();
+
+    let user:User | null = null;
+    for(const key in Data.accessTokens) {
+        if (Data.accessTokens[key] === accessToken) user = Data.users[key];
+    }
+
+    if (!user) return
+
+    delete Data.accessTokens[user.id];
+    delete Data.refreshTokens[user.id];
+}
 
 export const authAPI = {
-    login
+    login,
+    logout
 }
