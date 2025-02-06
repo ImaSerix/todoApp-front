@@ -1,5 +1,6 @@
 import {Todo, Task} from "../features/todo/types.ts";
 import {avaibleColors} from "../features/todo/avaibleColors.ts";
+import {authAPI} from "./authAPI.ts";
 
 interface iData {
     todos: Todo[],
@@ -9,101 +10,287 @@ interface iData {
 const nextTodoId = 2;
 const nextTaskId = 6;
 
-const data: iData = {
-    todos: [
-        {
-            id: 0,
-            title: "Some title",
-            color: avaibleColors[1],
-            tasks: [
-                {
-                    id: 0,
-                    text: "Some task 0",
-                    completed: true,
-                    todoId: 0,
-                },
-                {
-                    id: 1,
-                    text: "Some task 1",
-                    completed: true,
-                    todoId: 0,
-                },
-                {
-                    id: 2,
-                    text: "Some task 2",
-                    completed: true,
-                    todoId: 0,
-                },
-            ]
-        },
-        {
-            id: 1,
-            title: "Some title 2",
-            color: avaibleColors[3],
-            tasks: [
-                {
-                    id: 3,
-                    text: "Some task 3",
-                    completed: false,
-                    todoId: 1,
-                },
-                {
-                    id: 4,
-                    text: "Some task 4",
-                    completed: false,
-                    todoId: 1,
-                },
-                {
-                    id: 5,
-                    text: "Some task 5",
-                    completed: true,
-                    todoId: 1,
-                },
-            ]
-        },
-    ],
-    tasks: [
-        {
-            id: 0,
-            text: "Some task 0",
-            completed: true,
-            todoId: 0,
-        },
-        {
-            id: 1,
-            text: "Some task 1",
-            completed: true,
-            todoId: 0,
-        },
-        {
-            id: 2,
-            text: "Some task 2",
-            completed: true,
-            todoId: 0,
-        },
-        {
-            id: 3,
-            text: "Some task 3",
-            completed: false,
-            todoId: 1,
-        },
-        {
-            id: 4,
-            text: "Some task 4",
-            completed: false,
-            todoId: 1,
-        },
-        {
-            id: 5,
-            text: "Some task 5",
-            completed: true,
-            todoId: 1,
-        },
-    ]
+const answers:{[key:number]: iData} = {
+    1: {
+        todos: [
+            {
+                id: 0,
+                title: "Some title",
+                color: avaibleColors[1],
+                tasks: [
+                    {
+                        id: 0,
+                        text: "Some task 0",
+                        completed: true,
+                        todoId: 0,
+                    },
+                    {
+                        id: 1,
+                        text: "Some task 1",
+                        completed: true,
+                        todoId: 0,
+                    },
+                    {
+                        id: 2,
+                        text: "Some task 2",
+                        completed: true,
+                        todoId: 0,
+                    },
+                ]
+            },
+            {
+                id: 1,
+                title: "Some title 2",
+                color: avaibleColors[3],
+                tasks: [
+                    {
+                        id: 3,
+                        text: "Some task 3",
+                        completed: false,
+                        todoId: 1,
+                    },
+                    {
+                        id: 4,
+                        text: "Some task 4",
+                        completed: false,
+                        todoId: 1,
+                    },
+                    {
+                        id: 5,
+                        text: "Some task 5",
+                        completed: true,
+                        todoId: 1,
+                    },
+                ]
+            },
+        ],
+        tasks: [
+            {
+                id: 0,
+                text: "Some task 0",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 1,
+                text: "Some task 1",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 2,
+                text: "Some task 2",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 3,
+                text: "Some task 3",
+                completed: false,
+                todoId: 1,
+            },
+            {
+                id: 4,
+                text: "Some task 4",
+                completed: false,
+                todoId: 1,
+            },
+            {
+                id: 5,
+                text: "Some task 5",
+                completed: true,
+                todoId: 1,
+            },
+        ]
+    },
+    2: {
+        todos: [
+            {
+                id: 0,
+                title: "Some title for other person",
+                color: avaibleColors[1],
+                tasks: [
+                    {
+                        id: 0,
+                        text: "Some task 0",
+                        completed: true,
+                        todoId: 0,
+                    },
+                    {
+                        id: 1,
+                        text: "Some task 1",
+                        completed: true,
+                        todoId: 0,
+                    },
+                    {
+                        id: 2,
+                        text: "Some task 2",
+                        completed: true,
+                        todoId: 0,
+                    },
+                ]
+            },
+            {
+                id: 1,
+                title: "Some title for one more other",
+                color: avaibleColors[3],
+                tasks: [
+                    {
+                        id: 3,
+                        text: "Some task 3",
+                        completed: false,
+                        todoId: 1,
+                    },
+                    {
+                        id: 4,
+                        text: "Some task 4",
+                        completed: false,
+                        todoId: 1,
+                    },
+                    {
+                        id: 5,
+                        text: "Some task 5",
+                        completed: true,
+                        todoId: 1,
+                    },
+                ]
+            },
+        ],
+        tasks: [
+            {
+                id: 0,
+                text: "Some task 0",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 1,
+                text: "Some task 1",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 2,
+                text: "Some task 2",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 3,
+                text: "Some task 3",
+                completed: false,
+                todoId: 1,
+            },
+            {
+                id: 4,
+                text: "Some task 4",
+                completed: false,
+                todoId: 1,
+            },
+            {
+                id: 5,
+                text: "Some task 5",
+                completed: true,
+                todoId: 1,
+            },
+        ]
+    },
+    3: {
+        todos: [
+            {
+                id: 0,
+                title: "Some title for other person",
+                color: avaibleColors[1],
+                tasks: [
+                    {
+                        id: 0,
+                        text: "Some task 0",
+                        completed: true,
+                        todoId: 0,
+                    },
+                    {
+                        id: 1,
+                        text: "Some task 1",
+                        completed: true,
+                        todoId: 0,
+                    },
+                    {
+                        id: 2,
+                        text: "Some task 2",
+                        completed: true,
+                        todoId: 0,
+                    },
+                ]
+            },
+            {
+                id: 1,
+                title: "Some title for one more other bad person",
+                color: avaibleColors[3],
+                tasks: [
+                    {
+                        id: 3,
+                        text: "Some task 3",
+                        completed: false,
+                        todoId: 1,
+                    },
+                    {
+                        id: 4,
+                        text: "Some task 4",
+                        completed: false,
+                        todoId: 1,
+                    },
+                    {
+                        id: 5,
+                        text: "Some task 5",
+                        completed: true,
+                        todoId: 1,
+                    },
+                ]
+            },
+        ],
+        tasks: [
+            {
+                id: 0,
+                text: "Some task 0",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 1,
+                text: "Some task 1",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 2,
+                text: "Some task 2",
+                completed: true,
+                todoId: 0,
+            },
+            {
+                id: 3,
+                text: "Some task 3",
+                completed: false,
+                todoId: 1,
+            },
+            {
+                id: 4,
+                text: "Some task 4",
+                completed: false,
+                todoId: 1,
+            },
+            {
+                id: 5,
+                text: "Some task 5",
+                completed: true,
+                todoId: 1,
+            },
+        ]
+    },
 }
 
 type getDataPromise = {
-    error: null,
+    error: string |  null,
     data: {
         todos: {
             data: Todo[],
@@ -113,18 +300,24 @@ type getDataPromise = {
             data: Task[],
             nextId: number,
         }
-    }
+    } | null
 }
+
 const getData = async (): Promise<getDataPromise> => {
+
+    const user = authAPI.getUserFromToken();
+
+    if (!user) return Promise.resolve({ error: 'User is not authenticated', data: null })
+
     return Promise.resolve({
         error: null,
         data: {
             todos: {
-                data: data.todos,
+                data: answers[user.id].todos,
                 nextId: nextTodoId
             },
             tasks: {
-                data: data.tasks,
+                data: answers[user.id].tasks,
                 nextId: nextTaskId,
             }
         }

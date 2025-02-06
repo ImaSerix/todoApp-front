@@ -18,15 +18,19 @@ interface iTodoState {
         deleted: number[], //Deleted task id in app
     },
     loading: 'idle' | 'pending' | 'succeeded' | 'failed',
-    error: null
+    error: string | null,
 }
 
 export const loadData = createAsyncThunk(
     'todo/loadData',
     async (_, {rejectWithValue}) => {
         const response = await todoAPI.getData();
-        if (!response.error) rejectWithValue(response.error);
-        return Promise.resolve(response.data);
+
+        if (response.error) throw rejectWithValue({error: response.error});
+        if (!response.data) throw rejectWithValue({error: 'something bad'});
+
+
+        return Promise.resolve(response.data!);
     }
 )
 
@@ -74,6 +78,9 @@ interface todoIdColorPayload extends todoIdPayload {
 interface todoIdTextPayload extends todoIdPayload {
     text: string,
 }
+
+// Todo сделать возможность сохранять, а точнее как бы отправлять state
+//  разобраться с тем, чтоб updated как-то обновлялся
 
 const todoSlice = createSlice({
     name: 'todo',
@@ -180,14 +187,11 @@ const todoSlice = createSlice({
             state.error = null;
         });
         builder.addCase(loadData.rejected, (state, action) => {
+
             state.loading = 'failed';
-
-            if (action.payload) {
-                state.error = null;
-                return
-            }
-
-            console.error(action.error);
+            state.error = action.error as string;
+            state.tasks = initialState.tasks;
+            state.todos = initialState.todos;
         });
         builder.addCase(loadData.fulfilled, (state, action) => {
             state.loading = 'succeeded';

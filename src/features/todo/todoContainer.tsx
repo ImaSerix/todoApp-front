@@ -40,10 +40,12 @@ const TodoContainer = () => {
     const dispatch = useAppDispatch();
     const todos = useAppSelector(state => state.todo.todos);
     const tasks = useAppSelector(state => state.todo.tasks);
+    const auth = useAppSelector(state => state.auth.auth);
+
 
     useEffect(() => {
         dispatch(loadData());
-    }, [dispatch])
+    }, [dispatch, auth])
 
     const todoHandlers: iTodoHandlers = {
         handleAddTodo: () => {

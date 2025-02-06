@@ -40,7 +40,7 @@ const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
         '--todo-color-opacity': todo.color.opacity,
     } as CSSProperties}
                 className={`todo ${completed ? "todo--completed " : ""}${todo.editMode ? "todo--edit-mode" : ""} `.trim()}>
-
+        {/*Todo переделать это в заголовок, или как-то решить проблему, что если title слишком большой - не влезает в карточку */}
         <input className={'todo__title'} onChange={handleTitleTextChange} value={todo.title} readOnly={!todo.editMode}/>
 
         <div className="todo__task-list">

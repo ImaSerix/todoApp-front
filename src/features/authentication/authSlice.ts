@@ -35,7 +35,7 @@ const authSlice = createSlice({
     reducers:{
         logout: (state) => {
             if (state.user){
-                authAPI.logout().then(() => console.log('Successfully logged out'));
+                authAPI.logout();
             }
 
             state.user = null;

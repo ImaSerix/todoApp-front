@@ -5,13 +5,14 @@ class TokenManager {
     private refreshToken: string | null = null;
 
     private constructor() {
-        this.loadTokens();
+        this.removeTokens();
+        //this.loadTokens();
     }
 
-    private loadTokens() {
-        this.accessToken = localStorage.getItem("accessToken")
-        this.refreshToken = localStorage.getItem("accessToken")
-    }
+    // private loadTokens() {
+    //     this.accessToken = localStorage.getItem("accessToken")
+    //     this.refreshToken = localStorage.getItem("accessToken")
+    // }
 
     public static getInstance():TokenManager {
         if (TokenManager.instance == null) {
@@ -28,6 +29,11 @@ class TokenManager {
         localStorage.setItem("refreshToken", refreshToken);
     }
 
+    public removeTokens():void{
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+    }
+
     // Remove when server will be developed
     public getAccessToken() {
         return this.accessToken;
@@ -40,6 +46,8 @@ class TokenManager {
     public renewToken(): void{
         console.log(`Renewing token... using: '${this.refreshToken}'`);
     }
+
+
 
 }
 
