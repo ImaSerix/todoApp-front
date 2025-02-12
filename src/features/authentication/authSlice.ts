@@ -22,9 +22,17 @@ export const login = createAsyncThunk(
     async (arg:iLoginPayload, thunkAPI) => {
         const response = await authAPI.login(arg.email, arg.password);
 
-        if (!response.data) thunkAPI.rejectWithValue('Some error');
+        if (!response.login) thunkAPI.rejectWithValue('Login error');
 
-        return response.data!.user;
+        return response.login!.user;
+    }
+)
+
+export const logout = createAsyncThunk(
+    'auth/logout',
+    async (_, thunkAPI) => {
+        const response = await authAPI.logout();
+        if (!response.logout) thunkAPI.rejectWithValue('Logout error');
     }
 )
 
@@ -33,26 +41,23 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers:{
-        logout: (state) => {
-            if (state.user){
-                authAPI.logout();
-            }
 
-            state.user = null;
-            state.auth = false;
-        },
     },
     extraReducers:builder => {
         builder.addCase(login.fulfilled, (state, action) => {
             state.user = action.payload;
             state.auth = true;
         })
+        builder.addCase(logout.fulfilled, (state) => {
+            state.user = null;
+            state.auth = false;
+        })
     },
 })
 
 
-export const {
-    logout
-} = authSlice.actions;
+// export const {
+//
+// } = authSlice.actions;
 
 export default authSlice.reducer;

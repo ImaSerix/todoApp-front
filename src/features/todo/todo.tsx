@@ -3,6 +3,7 @@ import {iTask, iTodo} from "./types.ts";
 import {ChangeEvent, CSSProperties, useEffect, useState} from "react";
 import {iTaskHandlers, iTodoHandlers} from "./todoContainer.tsx";
 import ColorPicker from "./ColorPicker.tsx";
+import {useAppSelector} from "../../hooks.ts";
 
 // Todo - оформить, выделять edit-mode
 
@@ -29,15 +30,17 @@ const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
         setCompleted(isTodoCompleted);
     }, [tasks]);
 
+    const color = useAppSelector(state => state.todo.colors.data[todo.color])
+
     const handleTitleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
         todoHandlers.handleTodoTitleTextUpdate(todo.id, e.target.value);
     }
 
     return <div style={{
-        '--todo-color-red': todo.color.red,
-        '--todo-color-green': todo.color.green,
-        '--todo-color-blue': todo.color.blue,
-        '--todo-color-opacity': todo.color.opacity,
+        '--todo-color-red': color.red,
+        '--todo-color-green': color.green,
+        '--todo-color-blue': color.blue,
+        '--todo-color-opacity': color.opacity,
     } as CSSProperties}
                 className={`todo ${completed ? "todo--completed " : ""}${todo.editMode ? "todo--edit-mode" : ""} `.trim()}>
         {/*Todo переделать это в заголовок, или как-то решить проблему, что если title слишком большой - не влезает в карточку */}

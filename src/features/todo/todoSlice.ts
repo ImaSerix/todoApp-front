@@ -2,8 +2,8 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {todoAPI} from "../../api/todoAPI.ts";
 import {Color, iTask, iTodo} from "./types.ts";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
-import {avaibleColors} from "./avaibleColors.ts";
 
+// todo Проблемы с цветами, возможно также отдаёт не верный todo
 interface iTodoState {
     todos: {
         data: { [key: number]: iTodo },
@@ -17,6 +17,9 @@ interface iTodoState {
         updated: number[], //Updated tasks id in app
         deleted: number[], //Deleted task id in app
     },
+    colors: {
+        data: { [key: number]: Color },
+    }
     loading: 'idle' | 'pending' | 'succeeded' | 'failed',
     error: string | null,
 }
@@ -24,13 +27,14 @@ interface iTodoState {
 export const loadData = createAsyncThunk(
     'todo/loadData',
     async (_, {rejectWithValue}) => {
-        const response = await todoAPI.getData();
-
-        if (response.error) throw rejectWithValue({error: response.error});
-        if (!response.data) throw rejectWithValue({error: 'something bad'});
-
-
-        return Promise.resolve(response.data!);
+        try {
+            const response = await todoAPI.getData();
+            console.log(response);
+            return response
+        } catch (error) {
+            rejectWithValue(error)
+            return Promise.reject(error);
+        }
     }
 )
 
@@ -47,9 +51,12 @@ const initialState: iTodoState = {
         updated: [],
         deleted: [],
     },
+    colors: {
+        data: [],
+    },
     loading: 'idle',
     error: null,
-} satisfies iTodoState as iTodoState
+}
 
 export const enum todoSliceErrors {
     NO_SUCH_TASK,
@@ -108,30 +115,35 @@ const todoSlice = createSlice({
             const todo = state.todos.data[action.payload.todoId];
             if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
 
+            // Set that t`odo is updated
+            if (!state.todos.updated.find(id => id === action.payload.todoId)) state.todos.updated.push(action.payload.todoId);
             todo.title = action.payload.text;
         },
         toggleTaskStatus: (state, action: PayloadAction<taskIdPayload>) => {
             const task = state.tasks.data[action.payload.taskId];
             if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.taskId}'`, todoSliceErrors.NO_SUCH_TASK);
 
+
+            if (!state.tasks.updated.find(id => id === action.payload.taskId)) state.tasks.updated.push(action.payload.taskId);
             task.completed = !task.completed;
         },
         updateTaskText: (state, action: PayloadAction<taskIdTextPayload>) => {
             const task = state.tasks.data[action.payload.taskId];
             if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.taskId}'`, todoSliceErrors.NO_SUCH_TASK);
+
+            if (!state.tasks.updated.find(id => id === action.payload.taskId)) state.tasks.updated.push(action.payload.taskId);
             task.text = action.payload.text;
         },
         addTodo: (state) => {
-            const todoId = state.todos.nextId;
-            state.todos.updated.push(todoId);
-            state.todos.data[state.todos.nextId++] = {
-                id: todoId,
+            state.todos.updated.push(state.todos.nextId);
+            state.todos.data[state.todos.nextId] = {
+                id: state.todos.nextId++,
                 idInDb: null,
                 editMode: true,
                 colorPickerVisible: false,
                 tasks: [],
                 title: 'Unnamed',
-                color: avaibleColors[Math.floor(Math.random() * avaibleColors.length)],
+                color: Math.floor(Math.random() * Object.keys(state.colors.data).length),
             };
         },
         removeTodo: (state, action: PayloadAction<todoIdPayload>) => {
@@ -155,8 +167,9 @@ const todoSlice = createSlice({
             const todo = state.todos.data[action.payload.todoId];
             if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
 
+            if (!state.todos.updated.find(id => id === action.payload.todoId)) state.todos.updated.push(action.payload.todoId);
             todo.colorPickerVisible = false;
-            todo.color = action.payload.color;
+            todo.color = action.payload.color.id;
         },
         addTask: (state, action: PayloadAction<todoIdPayload>) => {
             const todo = state.todos.data[action.payload.todoId];
@@ -164,9 +177,8 @@ const todoSlice = createSlice({
 
             state.todos.data[action.payload.todoId].tasks.push(state.tasks.nextId);
             state.tasks.updated.push(state.tasks.nextId);
-            const taskId = state.tasks.nextId;
-            state.tasks.data[state.tasks.nextId++] = {
-                id: taskId,
+            state.tasks.data[state.tasks.nextId] = {
+                id: state.tasks.nextId++,
                 idInDb: null,
                 text: 'Unnamed',
                 completed: false,
@@ -187,29 +199,52 @@ const todoSlice = createSlice({
             state.error = null;
         });
         builder.addCase(loadData.rejected, (state, action) => {
-
             state.loading = 'failed';
             state.error = action.error as string;
+
             state.tasks = initialState.tasks;
             state.todos = initialState.todos;
+            state.colors = initialState.colors;
         });
         builder.addCase(loadData.fulfilled, (state, action) => {
             state.loading = 'succeeded';
             state.error = null;
 
-            const {tasks, todos} = action.payload;
+            state.todos.nextId = 0;
+            state.tasks.nextId = 0;
 
-            state.tasks.nextId = tasks.nextId;
-            state.tasks.data = tasks.data.reduce((acc, task) => {
-                acc[task.id] = {...task, idInDb: task.id};
-                return acc;
-            }, {} as { [key: number]: iTask });
+            const {tasks, todos, colors} = action.payload;
 
-            state.todos.nextId = todos.nextId;
-            state.todos.data = todos.data.reduce((acc, todo) => {
-                acc[todo.id] = {...todo, idInDb: todo.id, editMode: false, colorPickerVisible: false, tasks: todo.tasks.map(task => task.id)};
+            state.colors.data = colors.reduce<{ [key: number]: Color }>((acc, color) => {
+                acc[color.id] = {...color};
                 return acc;
-            }, {} as { [key: number]: iTodo });
+            }, {});
+
+            if (!tasks) state.tasks.data = initialState.tasks.data;
+            else {
+                state.tasks.data = tasks.reduce<{ [key: number]: iTask }>((acc, task) => {
+                    acc[task.id] = {...task, idInDb: task.id, id: task.id};
+                    if (state.tasks.nextId < task.id) state.tasks.nextId = 1 + task.id;
+                    return acc;
+                }, {});
+            }
+            console.log (todos);
+            if (!todos) state.todos.data = initialState.todos.data;
+            else {
+                state.todos.data = todos.reduce<{ [key: number]: iTodo }>((acc, todo) => {
+                    acc[todo.id] = {
+                        ...todo,
+                        color: todo.color.id,
+                        id: todo.id,
+                        idInDb: todo.id,
+                        editMode: false,
+                        colorPickerVisible: false,
+                        tasks: todo.tasks.map((task) => task.id),
+                    };
+                    if (state.todos.nextId < todo.id) state.tasks.nextId = 1 + todo.id;
+                    return acc;
+                }, {});
+            }
         });
     }
 })

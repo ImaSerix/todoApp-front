@@ -1,101 +1,63 @@
 import {User} from "../features/authentication/types.ts";
 import TokenManager from "../features/authentication/tokenManager.ts";
-
-interface iData {
-    users: User [],
-    refreshTokens: {[key:number]: string},
-    accessTokens: {[key:string]: number},
-}
-
-const Data:iData = {
-    users: [
-        {
-            id: 1,
-            username: 'persix',
-            email: 'persix@test.lv',
-            password: 'goodPass',
-        },
-        {
-            id: 2,
-            username: 'nicePerson',
-            email: 'nice@test.lv',
-            password: 'nicePass',
-        },
-        {
-            id: 3,
-            username: 'badPerson',
-            email: 'bad@test.lv',
-            password: 'badPass',
-        },
-    ],
-    refreshTokens: {},
-    accessTokens: {},
-}
+import client from "../graphQL/client.ts";
+import {LOGIN, LOGOUT} from "../graphQL/authQueries.ts";
+import tokenManager from "../features/authentication/tokenManager.ts";
 
 export const enum authErrors {
     WRONG_EMAIL_OR_PASSWORD,
 }
 
 interface iLoginPromise {
-    error:string | null,
-    data: {
+    login: {
+        accessToken: string,
+        refreshToken: string,
         user: User,
     } | null
 }
 
 const login = async (email: string, password: string): Promise<iLoginPromise> => {
-    const user = Data.users.find(value => value.email === email);
-    if (!user) return Promise.resolve({
-        error: 'Wrong pass or email',
-        data: null,
-    })
+    try {
+        const response = await client.mutate<iLoginPromise>({
+            mutation: LOGIN,
+            variables: {
+                email: email,
+                password: password,
+            }
+        })
+        if (!response.data || !response.data.login) return {login: null};
 
-    if (user.password !== password) return Promise.resolve({
-        error: 'Wrong pass or email',
-        data: null,
-    })
-
-    const refreshToken:string = Math.floor(Date.now() / 1000).toString();
-    Data.refreshTokens[user.id] = refreshToken;
-    const accessToken:string = Math.floor(Date.now() / 1000).toString();
-    Data.accessTokens[accessToken] = user.id;
-
-    TokenManager.getInstance().setTokens(accessToken, refreshToken);
-
-    return Promise.resolve({
-       error:null,
-       data:{
-           user: user,
-       }
-    })
+        tokenManager.getInstance().setTokens(response.data.login.accessToken, response.data.login.refreshToken);
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка авторизации', error);
+        throw error;
+    }
 }
 
-const logout = () => {
-
-    const accessToken = TokenManager.getInstance().getAccessToken();
-    if (!accessToken) return;
-
-    const user = Data.users.find(user => user.id === Data.accessTokens[accessToken]);
-
-    if (!user) return;
-
-    TokenManager.getInstance().removeTokens();
-
-    delete Data.accessTokens[accessToken];
-    delete Data.refreshTokens[user.id];
+interface iLogoutPromise {
+    logout: boolean,
 }
 
+const logout = async (): Promise<iLogoutPromise> => {
+    try {
+        const response = await client.mutate<iLogoutPromise>({
+            mutation: LOGOUT,
+        })
 
-// Dev function
-const getUserFromToken = () => {
-    const token = TokenManager.getInstance().getAccessToken();
-    if (!token) return null;
+        if (!response.data) return {logout: false}
 
-    return Data.users.find(user => user.id === Data.accessTokens[token]);
+        console.log (response.data.logout)
+        if (response.data.logout) TokenManager.getInstance().removeTokens();
+
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка выхода', error);
+        throw error;
+    }
 }
 
 export const authAPI = {
     login,
     logout,
-    getUserFromToken,
 }

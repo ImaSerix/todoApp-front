@@ -1,6 +1,6 @@
 import {Color} from "./types.ts";
-import {avaibleColors} from "./avaibleColors.ts";
 import {CSSProperties} from "react";
+import {useAppSelector} from "../../hooks.ts";
 
 interface ColorPickerProps {
     colorPicked: (color: Color) => void,
@@ -8,16 +8,23 @@ interface ColorPickerProps {
 
 
 const ColorPicker = ({colorPicked}: ColorPickerProps) => {
+    const availableColors = useAppSelector(state => state.todo.colors.data);
+    const colorKeys = Object.keys(colorPicked).map(key => Number(key));
+
     return <div className="color-picker">
-        {avaibleColors.map((color) => (<span
-            className={'color-picker__color'}
-            onClick={() => colorPicked(color)}
-            style={{
-                '--color-color-red': color.red,
-                '--color-color-green': color.green,
-                '--color-color-blue': color.blue,
-                '--color-color-opacity': color.opacity,
-            } as CSSProperties}></span>))}
+        {
+            colorKeys.map((key) => {
+                const color = availableColors[key];
+                return <span
+                    className={'color-picker__color'}
+                    onClick={() => colorPicked(color)}
+                    style={{
+                        '--color-color-red': color.red,
+                        '--color-color-green': color.green,
+                        '--color-color-blue': color.blue,
+                        '--color-color-opacity': color.opacity,
+                    } as CSSProperties}></span>
+            })}
     </div>
 }
 

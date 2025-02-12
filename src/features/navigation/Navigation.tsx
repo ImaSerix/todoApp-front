@@ -1,6 +1,6 @@
-import {iAuthenticationHandlers} from "./NavigationContainer.tsx";
 import MiniProfile from "./MiniProfile.tsx";
 import {iAuthState} from "../authentication/authSlice.ts";
+import {iAuthenticationHandlers} from "../../App.tsx";
 
 interface iNavigationProps{
     auth: iAuthState,

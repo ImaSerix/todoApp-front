@@ -1,18 +1,8 @@
 
 class TokenManager {
     private static instance: TokenManager | null = null;
-    private accessToken: string | null = null;
-    private refreshToken: string | null = null;
 
-    private constructor() {
-        this.removeTokens();
-        //this.loadTokens();
-    }
-
-    // private loadTokens() {
-    //     this.accessToken = localStorage.getItem("accessToken")
-    //     this.refreshToken = localStorage.getItem("accessToken")
-    // }
+    private constructor() {}
 
     public static getInstance():TokenManager {
         if (TokenManager.instance == null) {
@@ -22,9 +12,6 @@ class TokenManager {
     }
 
     public setTokens(accessToken: string, refreshToken:string): void {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
     }
@@ -34,21 +21,14 @@ class TokenManager {
         localStorage.removeItem("refreshToken");
     }
 
-    // Remove when server will be developed
-    public getAccessToken() {
-        return this.accessToken;
-    }
-
     public getAuthHeader() : Record<string, string> {
-        return this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {};
+        const accessToken = localStorage.getItem("accessToken");
+        return accessToken ? { authorization: `Bearer ${accessToken}` } : {};
     }
 
     public renewToken(): void{
-        console.log(`Renewing token... using: '${this.refreshToken}'`);
+        console.log(`Renewing token... using: '${localStorage.getItem("refreshToken")}'`);
     }
-
-
-
 }
 
 export default TokenManager;
