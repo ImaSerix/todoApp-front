@@ -1,8 +1,8 @@
-import Task from "./task.tsx";
-import {iTask, iTodo} from "./types.ts";
+import Task from "../task/task.tsx";
+import {iTask, iTodo} from "../../features/todo/types.ts";
 import {ChangeEvent, CSSProperties, useEffect, useState} from "react";
-import {iTaskHandlers, iTodoHandlers} from "./todoContainer.tsx";
-import ColorPicker from "./ColorPicker.tsx";
+import {iTodoHandlers} from "../../features/todo/todoContainer.tsx";
+import ColorPicker from "../color/ColorPicker.tsx";
 import {useAppSelector} from "../../hooks.ts";
 
 // Todo - оформить, выделять edit-mode
@@ -12,10 +12,9 @@ interface iTodoProps {
     todo: iTodo,
     tasks: iTask[],
     todoHandlers: Omit<iTodoHandlers, 'handleAddTodo'>,
-    taskHandlers: iTaskHandlers,
 }
 
-const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
+const TodoCard = ({todo, tasks, todoHandlers}: iTodoProps) => {
 
     const [completed, setCompleted] = useState(true);
 
@@ -79,4 +78,4 @@ const Todo = ({todo, tasks, todoHandlers, taskHandlers}: iTodoProps) => {
     </div>
 }
 
-export default Todo;
+export default TodoCard;

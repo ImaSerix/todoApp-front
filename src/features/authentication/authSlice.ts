@@ -3,23 +3,24 @@ import {authAPI} from "../../api/authAPI.ts";
 import {iUser} from "./types.ts";
 
 export interface iAuthState {
-    user:iUser | null,
-    auth:boolean,
+    user: iUser | null,
+    auth: boolean,
 }
 
 const initialState: iAuthState = {
-    user:null,
+    user: null,
     auth: false,
 }
 
 
-interface iLoginPayload{
+interface iLoginPayload {
     email: string,
     password: string,
 }
+
 export const login = createAsyncThunk(
     'auth/login',
-    async (arg:iLoginPayload, thunkAPI) => {
+    async (arg: iLoginPayload, thunkAPI) => {
         const response = await authAPI.login(arg.email, arg.password);
 
         if (!response.login) thunkAPI.rejectWithValue('Login error');
@@ -40,10 +41,8 @@ export const logout = createAsyncThunk(
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers:{
-
-    },
-    extraReducers:builder => {
+    reducers: {},
+    extraReducers: builder => {
         builder.addCase(login.fulfilled, (state, action) => {
             state.user = action.payload;
             state.auth = true;

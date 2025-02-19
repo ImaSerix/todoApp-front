@@ -13,7 +13,7 @@ import {
     todoSliceErrors, updateTodoColor, toggleColorPickerVisible
 } from "./todoSlice.ts";
 import './todo.scss';
-import TodoList from "./todoList.tsx";
+import TodoList from "../../components/todo/todoList.tsx";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
 import {Color} from "./types.ts";
 

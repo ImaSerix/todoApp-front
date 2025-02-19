@@ -1,30 +1,30 @@
-import {Color} from "./types.ts";
 import {CSSProperties} from "react";
 import {useAppSelector} from "../../hooks.ts";
+import {selectAllColors} from "../../features/color/colorSlice.ts";
+
+//Todo Может быть выделять уже выбранное значение?
 
 interface ColorPickerProps {
-    colorPicked: (color: Color) => void,
+    colorPicked: (colorId: string) => void,
 }
 
 
 const ColorPicker = ({colorPicked}: ColorPickerProps) => {
-    const availableColors = useAppSelector(state => state.todo.colors.data);
-    const colorKeys = Object.keys(colorPicked).map(key => Number(key));
+    const availableColors = useAppSelector(selectAllColors);
 
     return <div className="color-picker">
         {
-            colorKeys.map((key) => {
-                const color = availableColors[key];
-                return <span
+            availableColors.map((color) => (
+                <span
                     className={'color-picker__color'}
-                    onClick={() => colorPicked(color)}
+                    onClick={() => colorPicked(color.id)}
                     style={{
                         '--color-color-red': color.red,
                         '--color-color-green': color.green,
                         '--color-color-blue': color.blue,
                         '--color-color-opacity': color.opacity,
                     } as CSSProperties}></span>
-            })}
+            ))}
     </div>
 }
 
