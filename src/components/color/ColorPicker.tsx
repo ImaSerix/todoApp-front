@@ -8,7 +8,6 @@ interface ColorPickerProps {
     colorPicked: (colorId: string) => void,
 }
 
-
 const ColorPicker = ({colorPicked}: ColorPickerProps) => {
     const availableColors = useAppSelector(selectAllColors);
 

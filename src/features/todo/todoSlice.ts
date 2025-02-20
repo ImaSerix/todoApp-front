@@ -1,263 +1,151 @@
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {todoAPI} from "../../api/todoAPI.ts";
-import {Color, iTask, iTodo} from "./types.ts";
+import {createSelector, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
+import {v4 as uuidv4} from "uuid";
+import {RootState} from "../../app/store/store.ts";
 
-// todo Проблемы с цветами, возможно также отдаёт не верный todo
-interface iTodoState {
-    todos: {
-        data: { [key: number]: iTodo },
-        nextId: number,
-        updated: number[], //Updated todos id in app
-        deleted: number[], //Deleted task id in app
-    }
-    tasks: {
-        data: { [key: number]: iTask },
-        nextId: number,
-        updated: number[], //Updated tasks id in app
-        deleted: number[], //Deleted task id in app
-    },
-    colors: {
-        data: { [key: number]: Color },
-    }
-    loading: 'idle' | 'pending' | 'succeeded' | 'failed',
-    error: string | null,
+const DEFAULT_TODO_TITLE: string = 'Unnamed';
+
+interface iTodo {
+    id: string,
+    title: string,
+    colorId: string,
+    tasks: string[],
 }
 
-export const loadData = createAsyncThunk(
-    'todo/loadData',
-    async (_, {rejectWithValue}) => {
-        try {
-            const response = await todoAPI.getData();
-            console.log(response);
-            return response
-        } catch (error) {
-            rejectWithValue(error)
-            return Promise.reject(error);
-        }
-    }
-)
+interface iTodoState {
+    byId: Record<string, iTodo>,
+    allIds: Set<string>,
+    updated: Set<string>,
+    deleted: Set<string>,
+}
 
 const initialState: iTodoState = {
-    todos: {
-        data: [],
-        nextId: 0,
-        updated: [],
-        deleted: [],
-    },
-    tasks: {
-        data: [],
-        nextId: 0,
-        updated: [],
-        deleted: [],
-    },
-    colors: {
-        data: [],
-    },
-    loading: 'idle',
-    error: null,
+    byId: {},
+    allIds: new Set<string>(),
+    updated: new Set<string>(),
+    deleted: new Set<string>(),
 }
 
 export const enum todoSliceErrors {
-    NO_SUCH_TASK,
     NO_SUCH_TODO,
-    TODO_IS_EMPTY,
-    TODO_TITLE_IS_EMPTY,
-    TASK_TEXT_IS_EMPTY,
 }
-
-interface taskIdPayload {
-    taskId: number,
-}
-
-interface taskIdTextPayload extends taskIdPayload {
-    text: string,
-}
-
-interface todoIdPayload {
-    todoId: number,
-}
-
-interface todoIdColorPayload extends todoIdPayload {
-    color: Color,
-}
-
-interface todoIdTextPayload extends todoIdPayload {
-    text: string,
-}
-
-// Todo сделать возможность сохранять, а точнее как бы отправлять state
-//  разобраться с тем, чтоб updated как-то обновлялся
 
 const todoSlice = createSlice({
-    name: 'todo',
-    initialState,
+    name: "todo",
+    initialState: initialState,
     reducers: {
-        toggleTodoEditMode: (state, action: PayloadAction<todoIdPayload>) => {
-            const todo = state.todos.data[action.payload.todoId];
-            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
+        /**
+         *
+         * Sets todos to state.
+         *
+         * @param {iTodoState} state - The current state of the to-do.
+         * @param {PayloadAction<{ todos: iTodo[] }} action - An action object with the `todos` fetched from server.
+         * @param {iTodo[]} action.payload.tasks - List with todos from server.
+         *
+         * @returns {void} This reducer doesn't return any value
+         */
+        setTodos: (state: iTodoState, action: PayloadAction<{ todos: iTodo[] }>): void => {
+            state.byId = {};
+            state.allIds = new Set<string>();
+            state.deleted = new Set<string>();
+            state.updated = new Set<string>();
 
-            // Проверки перед отключением:
-            //  - Чтоб title не был пустой
-            //  - Чтоб был хоть один task
-            //  - Чтоб task был с текстом
-
-            if (todo.tasks.length == 0) throw new ErrorWithCode<todoSliceErrors>(`Todo must have at least one task!`, todoSliceErrors.TODO_IS_EMPTY);
-            if (todo.title.trim() == '') throw new ErrorWithCode<todoSliceErrors>(`Title mustn't be empty!`, todoSliceErrors.TODO_TITLE_IS_EMPTY);
-
-            for (const taskId of todo.tasks) {
-                if (state.tasks.data[taskId].text.trim() == '') throw new ErrorWithCode<todoSliceErrors>(`Task text mustn't be empty!`, todoSliceErrors.TASK_TEXT_IS_EMPTY);
+            for (const todo of action.payload.todos) {
+                state.byId[todo.id] = todo;
+                state.allIds.add(todo.id);
             }
-            todo.colorPickerVisible = false;
-            todo.editMode = !todo.editMode;
         },
-        updateTodoTitleText: (state, action: PayloadAction<todoIdTextPayload>) => {
-            const todo = state.todos.data[action.payload.todoId];
-            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
+        /**
+         *
+         * Updated `title` of the task
+         *
+         * @param {iTodoState} state - The current state of the to-do.
+         * @param {PayloadAction<{id:string, title:string}>} action - An action object with the `id` and `title` to update.
+         * @param {string} action.payload.id - The `id` of the to-do to update.
+         * @param {string} action.payload.content - The new title
+         *
+         * @throws {ErrorWithCode<todoSliceErrors>} `todoSliceErrors.NO_SUCH_TODO` if no to-do with the provided `id` is found.
+         *
+         * @returns {void} This reducer doesn't return any value
+         */
+        updateTodoTitleText: (state: iTodoState, action: PayloadAction<{ id: string, title: string }>): void => {
+            const todo = state.byId[action.payload.id];
+            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.id}'`, todoSliceErrors.NO_SUCH_TODO);
 
-            // Set that t`odo is updated
-            if (!state.todos.updated.find(id => id === action.payload.todoId)) state.todos.updated.push(action.payload.todoId);
-            todo.title = action.payload.text;
+            // Todo Надо добавить проверку на пустоту title, вероятно имеет смысл это сделать именно в компонентах
+            if (!state.updated.has(action.payload.id)) state.updated.add(action.payload.id);
+            todo.title = action.payload.title;
         },
-        toggleTaskStatus: (state, action: PayloadAction<taskIdPayload>) => {
-            const task = state.tasks.data[action.payload.taskId];
-            if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.taskId}'`, todoSliceErrors.NO_SUCH_TASK);
-
-
-            if (!state.tasks.updated.find(id => id === action.payload.taskId)) state.tasks.updated.push(action.payload.taskId);
-            task.completed = !task.completed;
+        /**
+         *
+         * Ads new to-do.
+         *
+         * @param {iTodoState} state - The current state of the to-do.
+         * @param {PayloadAction<colorId: string>} action - An action object with the `colorId` of which color to-do is.
+         * @param {string} action.payload.colorId - id of the color of which is to-do
+         *
+         * @returns {void} This reducer doesn't return any value
+         */
+        addTodo: (state: iTodoState, action: PayloadAction<{ colorId: string }>): void => {
+            const id = uuidv4();
+            state.byId[id] = {id: id, title: DEFAULT_TODO_TITLE, colorId: action.payload.colorId, tasks: []}
+            state.updated.add(id);
         },
-        updateTaskText: (state, action: PayloadAction<taskIdTextPayload>) => {
-            const task = state.tasks.data[action.payload.taskId];
-            if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.taskId}'`, todoSliceErrors.NO_SUCH_TASK);
+        /**
+         *
+         * Deletes to-do, also tracks deleted to-do ids, for next sync with server.
+         *
+         * @param {iTodoState} state - The current state of the to-do.
+         * @param {PayloadAction<{id:string}>} action - An action object with the `id`
+         * @param {string} action.payload.id - The `id` of the to-do to delete.
+         *
+         * @throws {ErrorWithCode<todoSliceErrors>} `todoSliceErrors.NO_SUCH_TODO` if no to-do with the provided `id` is found.
+         *
+         * @returns {void} This reducer doesn't return any value
+         */
+        removeTodo: (state: iTodoState, action: PayloadAction<{ id: string }>): void => {
+            const todo = state.byId[action.payload.id];
+            if (!todo) throw new ErrorWithCode(`No such todo with id: '${action.payload.id}'`, todoSliceErrors.NO_SUCH_TODO);
 
-            if (!state.tasks.updated.find(id => id === action.payload.taskId)) state.tasks.updated.push(action.payload.taskId);
-            task.text = action.payload.text;
+            delete state.byId[action.payload.id];
+            if (state.updated.has(action.payload.id)) state.updated.delete(action.payload.id);
+            if (state.allIds.has(action.payload.id)) state.allIds.delete(action.payload.id);
+            state.deleted.add(action.payload.id);
         },
-        addTodo: (state) => {
-            state.todos.updated.push(state.todos.nextId);
-            state.todos.data[state.todos.nextId] = {
-                id: state.todos.nextId++,
-                idInDb: null,
-                editMode: true,
-                colorPickerVisible: false,
-                tasks: [],
-                title: 'Unnamed',
-                color: Math.floor(Math.random() * Object.keys(state.colors.data).length),
-            };
+        /**
+         *
+         * Updates `colorId` of the task
+         *
+         * @param {iTodoState} state - The current state of the to-do.
+         * @param {PayloadAction<{id:string, colorId:string}>} action - An action object with the `id` and `colorId` to update.
+         * @param {string} action.payload.id - The `id` of the task to update.
+         * @param {string} action.payload.content - The new `colorId`
+         *
+         * @throws {ErrorWithCode<todoSliceErrors>} `todoSliceErrors.NO_SUCH_TODO` if no to-do with the provided `id` is found.
+         *
+         * @returns {void} This reducer doesn't return any value
+         */
+        updateTodoColor(state: iTodoState, action: PayloadAction<{ id: string, colorId: string }>): void {
+            const todo = state.byId[action.payload.id];
+            if (!todo) throw new ErrorWithCode(`No such todo with id: '${action.payload.id}'`, todoSliceErrors.NO_SUCH_TODO);
+
+            if (!state.updated.has(action.payload.id)) state.updated.add(action.payload.id);
+            todo.colorId = action.payload.colorId;
         },
-        removeTodo: (state, action: PayloadAction<todoIdPayload>) => {
-            const todo = state.todos.data[action.payload.todoId];
-            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
-
-            state.todos.deleted.push(action.payload.todoId);
-            state.tasks.deleted.push(...state.todos.data[action.payload.todoId].tasks);
-            for (const task of todo.tasks) {
-                delete state.tasks.data[task];
-            }
-            delete state.todos.data[action.payload.todoId];
-        },
-        toggleColorPickerVisible: (state, action: PayloadAction<todoIdPayload>) => {
-            const todo = state.todos.data[action.payload.todoId];
-            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
-
-            todo.colorPickerVisible = !todo.colorPickerVisible;
-        },
-        updateTodoColor(state, action: PayloadAction<todoIdColorPayload>) {
-            const todo = state.todos.data[action.payload.todoId];
-            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
-
-            if (!state.todos.updated.find(id => id === action.payload.todoId)) state.todos.updated.push(action.payload.todoId);
-            todo.colorPickerVisible = false;
-            todo.color = action.payload.color.id;
-        },
-        addTask: (state, action: PayloadAction<todoIdPayload>) => {
-            const todo = state.todos.data[action.payload.todoId];
-            if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
-
-            state.todos.data[action.payload.todoId].tasks.push(state.tasks.nextId);
-            state.tasks.updated.push(state.tasks.nextId);
-            state.tasks.data[state.tasks.nextId] = {
-                id: state.tasks.nextId++,
-                idInDb: null,
-                text: 'Unnamed',
-                completed: false,
-                todoId: action.payload.todoId
-            };
-        },
-        removeTask: (state, action: PayloadAction<taskIdPayload>) => {
-            const task = state.tasks.data[action.payload.taskId];
-            if (!task) throw new ErrorWithCode<todoSliceErrors>(`No such task with id: '${action.payload.taskId}'`, todoSliceErrors.NO_SUCH_TASK);
-
-            state.todos.data[task.todoId].tasks = state.todos.data[task.todoId].tasks.filter((taskId) => taskId != action.payload.taskId);
-            state.tasks.deleted.push(action.payload.taskId);
-        },
-    },
-    extraReducers: builder => {
-        builder.addCase(loadData.pending, (state) => {
-            state.loading = 'pending';
-            state.error = null;
-        });
-        builder.addCase(loadData.rejected, (state, action) => {
-            state.loading = 'failed';
-            state.error = action.error as string;
-
-            state.tasks = initialState.tasks;
-            state.todos = initialState.todos;
-            state.colors = initialState.colors;
-        });
-        builder.addCase(loadData.fulfilled, (state, action) => {
-            state.loading = 'succeeded';
-            state.error = null;
-
-            state.todos.nextId = 0;
-            state.tasks.nextId = 0;
-
-            const {tasks, todos, colors} = action.payload;
-
-            state.colors.data = colors.reduce<{ [key: number]: Color }>((acc, color) => {
-                acc[color.id] = {...color};
-                return acc;
-            }, {});
-
-            if (!tasks) state.tasks.data = initialState.tasks.data;
-            else {
-                state.tasks.data = tasks.reduce<{ [key: number]: iTask }>((acc, task) => {
-                    acc[task.id] = {...task, idInDb: task.id, id: task.id};
-                    if (state.tasks.nextId < task.id) state.tasks.nextId = 1 + task.id;
-                    return acc;
-                }, {});
-            }
-            console.log (todos);
-            if (!todos) state.todos.data = initialState.todos.data;
-            else {
-                state.todos.data = todos.reduce<{ [key: number]: iTodo }>((acc, todo) => {
-                    acc[todo.id] = {
-                        ...todo,
-                        color: todo.color.id,
-                        id: todo.id,
-                        idInDb: todo.id,
-                        editMode: false,
-                        colorPickerVisible: false,
-                        tasks: todo.tasks.map((task) => task.id),
-                    };
-                    if (state.todos.nextId < todo.id) state.tasks.nextId = 1 + todo.id;
-                    return acc;
-                }, {});
-            }
-        });
     }
 })
+
+export const selectTodoById = (state: RootState, id: string) => state.todo.byId[id];
+export const selectTodoIds = createSelector([
+        (state: RootState) => state.todo.allIds,],
+    (todoAllIds) => [...todoAllIds]);
+
 export const {
-    toggleTodoEditMode,
-    toggleTaskStatus,
-    updateTaskText,
+    setTodos,
     addTodo,
-    toggleColorPickerVisible,
     updateTodoColor,
     updateTodoTitleText,
     removeTodo,
-    addTask,
-    removeTask,
-} = todoSlice.actions
+} = todoSlice.actions;
+
 export default todoSlice.reducer;

@@ -1,5 +1,5 @@
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {RootState} from "../../store.ts";
+import {createSelector, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {RootState} from "../../app/store/store.ts";
 
 interface iColor {
     id: string,
@@ -47,13 +47,19 @@ const colorSlice = createSlice({
     }
 })
 
-export const selectColorById = (state: RootState, id: string) => state.color.byId[id]
-export const selectColorIds = (state: RootState) => [...state.color.allIds];
-export const selectAllColors = (state: RootState): iColor[] => {
-    const resultArr: iColor[] = [];
-    state.color.allIds.forEach(id => resultArr.push(state.color.byId[id]));
-    return resultArr;
-};
+export const selectColorById = createSelector([
+        (_: RootState, colorId: string) => colorId,
+        (state: RootState) => state.color.byId],
+    (colorId, colorsById) => colorsById[colorId])
+
+export const selectColorIds = createSelector([
+    (state: RootState) => state.color.allIds],
+    (colorAllIds) => colorAllIds)
+
+export const selectAllColors = createSelector([
+    (state: RootState) => state.color.allIds,
+    (state: RootState) => state.color.byId,],
+    (allIds, colorById) => [...allIds].map((colorId) => colorById[colorId]))
 
 export const {
     setColors,

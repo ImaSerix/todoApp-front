@@ -1,7 +1,7 @@
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createSelector, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
 import {v4 as uuidv4} from 'uuid';
-import {RootState} from "../../store.ts";
+import {RootState} from "../../app/redux/store.ts";
 
 const DEFAULT_TASK_CONTENT: string = 'Empty';
 
@@ -44,7 +44,7 @@ const taskSlice = createSlice({
          *
          * @returns {void} This reducer doesn't return any value
          */
-        setTasks: (state, action: PayloadAction<{ tasks: iTask[] }>) => {
+        setTasks: (state: iTaskState, action: PayloadAction<{ tasks: iTask[] }>): void => {
             state.byId = {};
             state.allIds = new Set<string>();
             state.deleted = new Set<string>();
@@ -66,7 +66,7 @@ const taskSlice = createSlice({
          *
          * @returns {void} This reducer doesn't return any value
          */
-        toggleTaskStatus: (state: iTaskState, action: PayloadAction<{ id: string }>) => {
+        toggleTaskStatus: (state: iTaskState, action: PayloadAction<{ id: string }>): void => {
             const task = state.byId[action.payload.id];
             if (!task) throw new ErrorWithCode(`No such task with id: '${action.payload.id}'`, taskSliceErrors.NO_SUCH_TASK);
 
@@ -120,30 +120,60 @@ const taskSlice = createSlice({
          *
          * @returns {void} This reducer doesn't return any value
          */
-        removeTask: (state: iTaskState, action: PayloadAction<{ id: string }>) => {
-            const task = state.byId[action.payload.id];
-            if (!task) throw new ErrorWithCode(`No such task with id: '${action.payload.id}'`, taskSliceErrors.NO_SUCH_TASK);
-
-            delete state.byId[action.payload.id];
+        removeTask: (state: iTaskState, action: PayloadAction<{ id: string }>): void => {
+            // delete state.byId[action.payload.id];
             if (state.updated.has(action.payload.id)) state.updated.delete(action.payload.id);
             if (state.allIds.has(action.payload.id)) state.allIds.delete(action.payload.id);
             state.deleted.add(action.payload.id);
         },
+        /** todo Write docs
+         *
+         * @param state
+         * @param action
+         */
+        removeTasks: (state: iTaskState, action: PayloadAction<{ ids: string[] }>): void => {
+            action.payload.ids.forEach(taskId => {
+                if (state.updated.has(taskId)) state.updated.delete(taskId);
+                if (state.allIds.has(taskId)) state.allIds.delete(taskId);
+                state.deleted.add(taskId)
+            });
+        }
     }
 })
 
 
-export const selectUpdatedAndDeleted = (state:RootState)=>{
-    const updatedTasks:iTask[] = [];
-    const deletedTasks:string[] = [...state.task.deleted];
+export const selectUpdatedAndDeleted = createSelector([
+        (state: RootState) => state.task.updated,
+        (state: RootState) => state.task.deleted],
+    (updated, deleted) => {
+        return {updated, deleted}
+    }
+)
 
-    state.task.updated.forEach(key => {
-        updatedTasks.push(state.task.byId[key]);
-    })
+// Version which return iTask[] as updatedTasks and string[] as deletedTasks
+// export const selectUpdatedAndDeleted = (state: RootState) => {
+//     const updatedTasks: iTask[] = [];
+//     const deletedTasks: string[] = [...state.task.deleted];
+//
+//     state.task.updated.forEach(key => {
+//         updatedTasks.push(state.task.byId[key]);
+//     })
+//
+//     return {updatedTasks, deletedTasks}
+// }
 
-    return {updatedTasks, deletedTasks}
-}
-export const selectTaskById = (state:RootState, id:string) => state.task.byId[id];
+export const selectTaskById = createSelector([
+        (_:RootState, taskId: string) => taskId,
+        (state: RootState) => state.task.byId],
+    (taskId, tasksById) => tasksById[taskId],
+)
+export const selectAreAllTasksCompleted = createSelector([
+        (_:RootState, taskIds: string[]) => taskIds,
+        (state: RootState) => state.task.byId],
+    (taskIds, tasksById) => {
+        return taskIds.every(id => tasksById[id]?.completed);
+    }
+)
 
 export const {
     setTasks,
@@ -151,6 +181,7 @@ export const {
     updateTaskContent,
     removeTask,
     addTask,
+    removeTasks,
 } = taskSlice.actions;
 
 export default taskSlice.reducer;

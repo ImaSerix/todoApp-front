@@ -1,9 +1,10 @@
 import Task from "./task.tsx";
 import {useAppDispatch} from "../../hooks.ts";
-import {removeTask, toggleTaskStatus, updateTaskContent} from "../../features/task/taskSlice.ts";
+import {addTask, removeTask, toggleTaskStatus, updateTaskContent} from "../../features/task/taskSlice.ts";
 
 interface iTaskListProps {
     taskIds: string[],
+    todoId: string,
     editMode: boolean,
 }
 
@@ -13,7 +14,7 @@ export interface iTaskHandlers {
     handleRemoveTask: () => void,
 }
 
-const TaskList = ({taskIds, editMode}: iTaskListProps) => {
+const TaskList = ({todoId, taskIds, editMode}: iTaskListProps) => {
 
     const dispatch = useAppDispatch();
 
@@ -34,12 +35,19 @@ const TaskList = ({taskIds, editMode}: iTaskListProps) => {
         }
     }
 
+    const handleAddTask = () =>{
+        dispatch(addTask({todoId}))
+    }
+
     return <div className={'task-list'}>
-        {taskIds.map((taskId: string) => <Task
-            taskId={taskId}
-            editMode={editMode}
-            taskHandlers={createTaskHandlers(taskId)}
-        />)}
+        <div className={'tasks'}>
+            {taskIds.map((taskId: string) => <Task
+                taskId={taskId}
+                editMode={editMode}
+                taskHandlers={createTaskHandlers(taskId)}
+            />)}
+        </div>
+        <button className={'todo__button-add'} onClick={handleAddTask}>+</button>
     </div>
 }
 
