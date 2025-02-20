@@ -1,8 +1,8 @@
-import {User} from "../features/authentication/types.ts";
-import TokenManager from "../features/authentication/tokenManager.ts";
-import client from "../graphQL/client.ts";
-import {LOGIN, LOGOUT} from "../graphQL/authQueries.ts";
-import tokenManager from "../features/authentication/tokenManager.ts";
+import {User} from "../../features/authentication/types.ts";
+import TokenManager from "../../features/authentication/tokenManager.ts";
+import client from "../../graphQL/client.ts";
+import {LOGIN, LOGOUT} from "../../graphQL/authQueries.ts";
+import tokenManager from "../../features/authentication/tokenManager.ts";
 
 export const enum authErrors {
     WRONG_EMAIL_OR_PASSWORD,

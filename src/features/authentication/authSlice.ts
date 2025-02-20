@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {authAPI} from "../../api/authAPI.ts";
+import {authAPI} from "../../api/auth/authAPI.ts";
 import {iUser} from "./types.ts";
 
 export interface iAuthState {

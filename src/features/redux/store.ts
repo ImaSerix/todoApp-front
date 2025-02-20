@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit'
-import todoReducer from "./features/todov2/todoSlice.ts"
-import authReducer from "./features/authentication/authSlice.ts"
-import taskReducer from "./features/task/taskSlice.ts"
-import colorReducer from "./features/color/colorSlice.ts"
+import todoReducer from "../todo/todoSlice.ts"
+import authReducer from "../authentication/authSlice.ts"
+import taskReducer from "../task/taskSlice.ts"
+import colorReducer from "../color/colorSlice.ts"
 
 export const store = configureStore({
     reducer: {

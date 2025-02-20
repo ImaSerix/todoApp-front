@@ -1,28 +1,28 @@
 import TodoCard from "./todoCard.tsx";
 import {useAppDispatch, useAppSelector} from "../../hooks.ts";
-import {addTodo, updateTodoTitleText, removeTodo, updateTodoColor} from "../../features/todov2/todoSlice.ts";
+import {addTodo, updateTodoTitleText, removeTodo, updateTodoColor} from "../../features/todo/todoSlice.ts";
 import {selectColorIds} from "../../features/color/colorSlice.ts";
 
 // todo Если todo список пустой, то тоже надо что-то написать
 
 interface iTodoListProps {
-    todosIds: string[],
+    todoIds: string[],
 }
 
-interface iTodoHandlers {
+export interface iTodoHandlers {
     handleAddTodo: () => void,
     handleTodoTitleTextUpdate: (title: string) => void,
     handleRemoveTodo: () => void,
     handleTodoColorUpdate: (colorId: string) => void,
 }
 
-const TodoList = ({todosIds}:iTodoListProps) => {
+const TodoList = ({todoIds}:iTodoListProps) => {
 
     const dispatch = useAppDispatch();
     const colors = useAppSelector (selectColorIds);
 
     const getRandomColorId = () => {
-        return colors[Math.floor(Math.random() * colors.length)];
+        return [...colors][Math.floor(Math.random() * colors.size)];
     }
 
     const createTodoHandlers = (id: string):iTodoHandlers => {
@@ -34,11 +34,10 @@ const TodoList = ({todosIds}:iTodoListProps) => {
         }
     }
 
-
     return <div className="todoList">
-        {todosIds.length == 0? <div>{'Todo list is empty'}</div>: <>
-            {todosIds.map(id => {
-                return <TodoCard todoId={id}/>
+        {todoIds.length == 0? <div>{'Todo list is empty'}</div>: <>
+            {todoIds.map(id => {
+                return <TodoCard todoId={id} todoHandlers={createTodoHandlers(id)}/>
             })}
         </>}
     </div>

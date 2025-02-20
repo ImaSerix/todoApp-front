@@ -1,7 +1,7 @@
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createSelector, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import ErrorWithCode from "../../app/ErrorWithCode.ts";
 import {v4 as uuidv4} from 'uuid';
-import {RootState} from "../../store.ts";
+import {RootState} from "../redux/store.ts";
 
 const DEFAULT_TASK_CONTENT: string = 'Empty';
 
@@ -133,17 +133,38 @@ const taskSlice = createSlice({
 })
 
 
-export const selectUpdatedAndDeleted = (state:RootState)=>{
-    const updatedTasks:iTask[] = [];
-    const deletedTasks:string[] = [...state.task.deleted];
+export const selectUpdatedAndDeleted = createSelector([
+        (state: RootState) => state.task.updated,
+        (state: RootState) => state.task.deleted],
+    (updated, deleted) => {
+        return {updated, deleted}
+    }
+)
 
-    state.task.updated.forEach(key => {
-        updatedTasks.push(state.task.byId[key]);
-    })
+// Version which return iTask[] as updatedTasks and string[] as deletedTasks
+// export const selectUpdatedAndDeleted = (state: RootState) => {
+//     const updatedTasks: iTask[] = [];
+//     const deletedTasks: string[] = [...state.task.deleted];
+//
+//     state.task.updated.forEach(key => {
+//         updatedTasks.push(state.task.byId[key]);
+//     })
+//
+//     return {updatedTasks, deletedTasks}
+// }
 
-    return {updatedTasks, deletedTasks}
-}
-export const selectTaskById = (state:RootState, id:string) => state.task.byId[id];
+export const selectTaskById = createSelector([
+        (_:RootState, taskId: string) => taskId,
+        (state: RootState) => state.task.byId],
+    (taskId, tasksById) => tasksById[taskId],
+)
+export const selectAreAllTasksCompleted = createSelector([
+        (_:RootState, taskIds: string[]) => taskIds,
+        (state: RootState) => state.task.byId],
+    (taskIds, tasksById) => {
+        return taskIds.every(id => tasksById[id]?.completed);
+    }
+)
 
 export const {
     setTasks,
