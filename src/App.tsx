@@ -1,9 +1,9 @@
 import './App.css'
-import TodoContainer from "./features/todo/todoContainer.tsx";
 import {useAppDispatch, useAppSelector} from "./hooks.ts";
 import AuthForm from "./features/authentication/authForm.tsx";
 import {login, logout} from "./features/authentication/authSlice.ts";
 import Navigation from "./features/navigation/Navigation.tsx";
+import TodoContainer from "./features/todo/components/todoContainer.tsx";
 
 export interface iAuthenticationHandlers{
     login: (email:string, password:string) => void,
@@ -28,7 +28,7 @@ function App() {
         <div className="app">
             <Navigation authenticationHandlers={authenticationHandlers} auth={auth}/>
             <div className={'app__content'}>
-                {auth.auth? <TodoContainer/>:<>
+                {auth.user? <TodoContainer/>:<>
                     <div className={'authFrom-container'}>
                         <p className={'authForm-container__text'}>Please sign in for adding Todos</p>
                         <AuthForm authenticate={authenticationHandlers.login}/>

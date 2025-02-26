@@ -4,19 +4,25 @@
     gap: 1em;
 }
 
-.todo-container {
+.todoList {
     padding: 1em;
     @include defaultGrid;
     position: relative;
 
     &__button-add {
+        top: -15px;
+        left: -15px;
+    }
+    &__button-save-updates{
+        left: 45px;
+        top: -15px;
+    }
+    &__button-add, &__button-save-updates {
         width: 50px;
         height: 50px;
         background: transparent;
         border-radius: 15px;
         position: absolute;
-        top: -15px;
-        left: -15px;
         padding: 0.8em;
         transition: 0.25s;
         border: 1px gray solid;
@@ -31,6 +37,15 @@
             background-image: url("../../assets/plus.svg");
         }
 
+        & span.img-discrete{
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-size:cover;
+            background-image: url("../../assets/save-button.svg");
+        }
+
         &:hover {
             cursor: pointer;
             background-color: rgba(211, 211, 211, 0.2);
@@ -38,11 +53,13 @@
     }
 }
 
-.todo-list {
+.todo-cards{
     display: flex;
     flex-wrap: wrap;
     justify-content: left;
+    padding-top:15px
 }
+
 
 @mixin imgButton() {
     height: 20px;
@@ -67,16 +84,15 @@
     border-radius: 10px;
     background-color: rgba(var(--todo-color-red), var(--todo-color-green), var(--todo-color-blue), var(--todo-color-opacity));
     box-shadow: 1px 1px 2px 1px rgb(var(--todo-color-red), var(--todo-color-green), var(--todo-color-blue));
+    width: fit-content;
 
-    & input{
-        background-color: transparent;
-        border: none;
-        outline: none;
-    }
     &__title {
         font-size: 1.3em;
         text-align: center;
         margin-bottom: 0.5em;
+
+        max-width: 30vw;
+        min-width: 250px;
     }
 
     &__task-list {
@@ -148,7 +164,7 @@
         cursor: pointer;
     }
 
-    &--edit-mode .task__text {
+    &--isEditable .task__text {
         cursor: text;
     }
     &--completed{
@@ -158,9 +174,17 @@
     }
 }
 
+.tasks{
+    max-width: 30vw;
+    min-width: 250px;
+}
+
 .task {
     display: flex;
 
+    & p{
+        margin: 5px;
+    }
     &__text {
         font-size: 1em;
         cursor: default;
@@ -173,6 +197,8 @@
 
     &__delete-button {
         flex-grow: 0;
+        flex-shrink: 0;
+        margin:auto;
         @include imgButton;
         & span.img-bin {
             background-image: url("../../assets/delete-button.svg");
@@ -186,16 +212,25 @@
         text-decoration: line-through;
     }
 }
+.color-picker-wrapper{
 
-.color-picker{
-    position: absolute;
+    top:0;
+    left: 30px;
+}
+.color-picker--hidden{
+    display: none;
+}
+.color-picker--visible{
     display: flex;
+}
+.color-picker{
+    top:0;
+    left: 30px;
+    position: absolute;
     max-width: calc(100% - 30px);
     max-height: calc(100%);
     flex-direction: column;
     flex-wrap: wrap;
-    top:0;
-    left: 30px;
     background: rgba(255, 255, 255, 0.90);
     border-radius: 0 0 5px 5px;
 

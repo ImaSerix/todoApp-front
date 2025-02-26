@@ -9,7 +9,7 @@ interface iMiniProfileProps{
 const MiniProfile = ({ auth, authenticationHandlers}:iMiniProfileProps) => {
 
     // If not authenticated
-    if (!auth.auth) return <div className="mini-profile">
+    if (!auth.user) return <div className="mini-profile">
         <p className={'mini-profile__username'}>Guest</p>
     </div>
 
