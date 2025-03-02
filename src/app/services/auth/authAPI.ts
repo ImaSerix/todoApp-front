@@ -7,7 +7,7 @@ export const enum authErrors {
 }
 
 interface iLoginPromise {
-    login: {
+    loginUser: {
         accessToken: string | null,
         csrfToken: string | null,
         user: User | null,
@@ -33,7 +33,7 @@ const login = async (email?: string, password?: string): Promise<iLoginPromise> 
 }
 
 interface iLogoutPromise {
-    logout: boolean,
+    logoutUser: boolean,
 }
 
 const logout = async (): Promise<iLogoutPromise> => {

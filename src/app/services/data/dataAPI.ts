@@ -8,6 +8,8 @@ interface getDataPromise {
     colors: Color[]
 }
 
+// todo Там сейчас список возвращается не совсем как список, в общем смотри схему, надо переделать запрос за todo
+
 const getData = async (): Promise<getDataPromise> => {
     try {
         const response = await client.query<getDataPromise>({query: GET_DATA});

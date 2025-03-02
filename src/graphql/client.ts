@@ -3,7 +3,7 @@ import {setContext} from "@apollo/client/link/context";
 import {store} from "../app/redux/store.ts";
 
 const httpLink = createHttpLink({
-    uri: 'http://localhost:4000/graphql',
+    uri: 'http://localhost:3000',
 });
 
 const authLink = setContext((_, { headers }) => {

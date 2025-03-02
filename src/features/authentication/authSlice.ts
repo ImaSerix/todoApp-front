@@ -22,7 +22,7 @@ export const login = createAsyncThunk(
     async (arg: { email: string, password: string }) => {
         try {
             const response = await authAPI.login(arg.email, arg.password);
-            return response.login!;
+            return response.loginUser!;
         } catch (error) {
             console.log(error)
         }
@@ -34,7 +34,7 @@ export const logout = createAsyncThunk(
     async () => {
         try {
             const response = await authAPI.logout();
-            return response.logout!;
+            return response.logoutUser!;
         } catch (error) {
             console.log(error);
         }
