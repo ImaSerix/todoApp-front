@@ -4,7 +4,6 @@ import {addTodo, updateTodoTitleText, removeTodo, updateTodoColor} from "../redu
 import {selectColorIds} from "../../color/redux/colorSlice.ts";
 import saveUpdates from "../../../app/redux/saveUpdates.ts";
 
-// todo Если todo список пустой, то тоже надо что-то написать
 
 interface iTodoListProps {
     todoIds: string[],
@@ -56,22 +55,5 @@ const TodoList = ({todoIds}: iTodoListProps) => {
             <span className={`img-discrete`}/>
         </button>
     </div>
-
-
-    // return <div className={'todo-list'}>
-    //         {
-    //             Object.keys(todos).length == 0 ? <div>{'Todo list is empty'}</div> :
-    //                 Object.keys(todos).map((taskId) => {
-    //                     const numericTaskId = Number(taskId);
-    //                     const todo = todos[numericTaskId];
-    //                     return <TodoCard
-    //                         todo={todo}
-    //                         key={numericTaskId}
-    //                         tasks={todo.tasks.map(taskId => tasks[taskId])}
-    //                         todoHandlers={todoHandlers}
-    //                         taskHandlers={taskHandlers}/>
-    //                 })
-    //         }
-    //     </div>
 }
 export default TodoList;

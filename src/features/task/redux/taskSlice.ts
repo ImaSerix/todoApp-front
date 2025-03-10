@@ -1,5 +1,5 @@
 import {createSelector, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import ErrorWithCode from "../../../app/ErrorWithCode.ts";
+import ErrorWithCode from "../../../app/utils/ErrorWithCode.ts";
 import {v4 as uuidv4} from 'uuid';
 import {RootState} from "../../../app/redux/store.ts";
 import loadData from "../../../app/redux/loadData.ts";
@@ -12,7 +12,7 @@ export interface iTask {
     todoId: string;
     completed: boolean;
 }
-// todo Всё таки добавить ещё один список в котором будут разделены task по todoId: task[]
+
 interface iTaskState {
     byId: Record<string, iTask>,
     allIds: string[],
@@ -120,6 +120,7 @@ const taskSlice = createSlice({
             const id = uuidv4();
             state.byId[id] = {id: id, todoId: action.payload.todoId, content: DEFAULT_TASK_CONTENT, completed: false};
             state.allIds.push(id);
+            if (!state.byTodoId[action.payload.todoId]) state.byTodoId[action.payload.todoId] = [];
             state.byTodoId[action.payload.todoId].push(id)
             state.updated.push(id);
         },
@@ -144,7 +145,7 @@ const taskSlice = createSlice({
             state.byTodoId[task.todoId] = state.byTodoId[task.todoId].filter(id => id !== action.payload.id);
             state.deleted.push(action.payload.id);
         },
-        /** todo Write docs
+        /**
          *
          * @param state
          * @param action
@@ -171,7 +172,7 @@ const taskSlice = createSlice({
             state.deleted = [];
             state.updated = [];
 
-            const taskData = action.payload!.tasks;
+            const taskData = action.payload.tasks;
 
             taskData.forEach(task => {
                 if (!(task.todoId in state.byTodoId)) state.byTodoId[task.todoId] = [];
@@ -190,28 +191,15 @@ export const selectDeletedTaskIds = (state:RootState) => {
 export const selectUpdatedTasks = (state: RootState) => {
     return state.task.updated.map(taskId => state.task.byId[taskId]);
 }
-
 export const selectTaskLoading = (state: RootState) => state.task.loading;
 
-export const selectTaskById = createSelector([
-        (_: RootState, taskId: string) => taskId,
-        (state: RootState) => state.task.byId],
-    (taskId, tasksById) => tasksById[taskId],
-)
-
-// export const selectAreAllTasksCompleted = createSelector([
-//         (_: RootState, taskIds: string[]) => taskIds,
-//         (state: RootState) => state.task.byId],
-//     (taskIds, tasksById) => {
-//         return taskIds.every(id => tasksById[id]?.completed);
-//     }
-// )
+export const selectTaskById = (state:RootState, taskId:string) => state.task.byId[taskId];
 
 export const selectTaskIdsByTodoId = createSelector([
         (_: RootState, todoId: string) => todoId,
         (state: RootState) => state.task.byTodoId],
     (todoId, tasksByTodoId) => {
-        return tasksByTodoId[todoId];
+        return tasksByTodoId[todoId] || [];
     })
 
 export const selectAreAllTasksOfTodoIdCompleted = createSelector([
@@ -219,7 +207,7 @@ export const selectAreAllTasksOfTodoIdCompleted = createSelector([
     (state:RootState) => state.task.byId,
     (state:RootState) => state.task.byTodoId],
     (todoId, tasksById,tasksByTodoId) => {
-        return tasksByTodoId[todoId].every((id) => tasksById[id]?.completed);
+        return tasksByTodoId[todoId]?.every((id) => tasksById[id]?.completed);
     })
 
 export const {

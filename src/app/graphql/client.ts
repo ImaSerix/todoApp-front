@@ -1,6 +1,6 @@
 import {ApolloClient, createHttpLink, InMemoryCache} from "@apollo/client";
 import {setContext} from "@apollo/client/link/context";
-import {store} from "../app/redux/store.ts";
+import {store} from "../redux/store.ts";
 
 const httpLink = createHttpLink({
     uri: 'http://localhost:3000',

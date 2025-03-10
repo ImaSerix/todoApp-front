@@ -2,8 +2,6 @@ import {CSSProperties, useEffect, useRef} from "react";
 import {useAppSelector} from "../../../hooks.ts";
 import {selectAllColors} from "../redux/colorSlice.ts";
 
-//Todo Может быть выделять уже выбранное значение?
-
 interface ColorPickerProps {
     colorPicked: (colorId: string) => void,
     colorPickerVisible: boolean,

@@ -1,39 +1,29 @@
 import {Todo, Task, Color} from "./types.ts";
-import client from "../../../graphql/client.ts";
-import {GET_DATA, SAVE_UPDATES} from "./dataQueries.ts";
+import client from "../../graphql/client.ts";
+import {DATA_QUERY, SAVE_UPDATES} from "./dataQueries.ts";
 
-interface getDataPromise {
+export interface iGetDataPayload {
     todos: Todo[],
     tasks: Task[],
     colors: Color[]
 }
 
-// todo Там сейчас список возвращается не совсем как список, в общем смотри схему, надо переделать запрос за todo
-
-const getData = async (): Promise<getDataPromise> => {
-    try {
-        const response = await client.query<getDataPromise>({query: GET_DATA});
-        return response.data;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
+const getData = async (): Promise<iGetDataPayload> => {
+    const response = await client.query<iGetDataPayload>({query: DATA_QUERY, variables: {}});
+    return response.data;
 }
 
-interface saveDataPromise {
-    saveUpdates: boolean;
+export interface iSaveDataPayload {
+    todos: Todo[],
+    tasks: Task[],
+    colors: Color[]
 }
 
-const saveUpdates = async (state: string): Promise<saveDataPromise> => {
-    try {
-        const response = await client.mutate<saveDataPromise>({
-            mutation: SAVE_UPDATES, variables: {state}
-        });
-        return response.data!;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
+const saveUpdates = async (state: string): Promise<iSaveDataPayload> => {
+    const response = await client.mutate<iSaveDataPayload>({
+        mutation: SAVE_UPDATES, variables: {state}
+    });
+    return response.data!;
 }
 
 export const dataAPI = {

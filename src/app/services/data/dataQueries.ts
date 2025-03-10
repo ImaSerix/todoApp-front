@@ -1,14 +1,18 @@
 import {gql} from "@apollo/client";
 
-//todo Убрать userId при релиз билде
-export const GET_DATA = gql`
-    query GetDataQuery {
+export const DATA_QUERY = gql`
+    query getData {
         todos {
             id
             title
             colorId
             userId
-            taskIds
+        }
+        tasks {
+            id
+            todoId
+            content
+            completed
         }
         colors {
             id
@@ -17,17 +21,31 @@ export const GET_DATA = gql`
             blue
             opacity
         }
-        tasks {
-            id
-            content
-            completed
-            todoId
-        }
     }
 `
 
 export const SAVE_UPDATES = gql`
-    mutation SaveUpdates($state: String!) {
-        saveUpdates(state: $state)
+    mutation saveUpdates($state: String!) {
+        saveUpdates(state: $state){
+            todos {
+                id
+                title
+                colorId
+                userId
+            }
+            tasks {
+                id
+                todoId
+                content
+                completed
+            }
+            colors {
+                id
+                red
+                green
+                blue
+                opacity
+            }
+        }
     }
 `

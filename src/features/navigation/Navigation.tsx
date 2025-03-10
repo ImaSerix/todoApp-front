@@ -1,15 +1,13 @@
 import MiniProfile from "./MiniProfile.tsx";
-import {iAuthState} from "../authentication/authSlice.ts";
-import {iAuthenticationHandlers} from "../../App.tsx";
 
 interface iNavigationProps{
-    auth: iAuthState,
-    authenticationHandlers: iAuthenticationHandlers,
+    username: string | null,
+    logoutHandler: () => void,
 }
 
-const Navigation = ({auth, authenticationHandlers}:iNavigationProps) =>{
+const Navigation = ({username, logoutHandler}:iNavigationProps) =>{
     return <nav className="app__nav">
-        <MiniProfile auth = {auth} authenticationHandlers={authenticationHandlers}/>
+        <MiniProfile username = {username} logoutHandler={logoutHandler}/>
     </nav>
 }
 

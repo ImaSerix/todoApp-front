@@ -49,7 +49,7 @@ const colorSlice = createSlice({
             }
         }
     },
-    //todo Write some docs
+
     extraReducers: (builder) => {
         builder.addCase(loadData.pending, (state) => {
             state.loading = 'pending';
@@ -60,7 +60,7 @@ const colorSlice = createSlice({
             state.byId = {};
             state.allIds = [];
 
-            const colorsData:Color[] = action.payload!.colors;
+            const colorsData:Color[] = action.payload.colors;
 
             colorsData.forEach(color => {
                 state.byId[color.id] = color;

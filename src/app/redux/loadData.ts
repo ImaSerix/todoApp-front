@@ -1,15 +1,38 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {dataAPI} from "../services/data/dataAPI.ts";
+import {dataAPI, iGetDataPayload} from "../services/data/dataAPI.ts";
+import handleError, {errorCodes} from "../utils/handleError.js";
+import {renewToken} from "../../features/authentication/redux/authSlice.js";
 
 
-const loadData = createAsyncThunk(
-    'data/loadData',
-    async () => {
-        try{
-            return await dataAPI.getData();
+const loadData = createAsyncThunk<
+    iGetDataPayload,
+    void,
+    {
+        rejectValue: {
+            code: string
         }
-        catch (error){
-            console.log (error);
+    }
+>(
+    'data/loadData',
+    async (_: void, thunkAPI) => {
+        try {
+            return await dataAPI.getData();
+        } catch (error) {
+            const err = handleError(error)
+            if (err.code === errorCodes.NOT_AUTHENTICATED){
+                const renewTokenResult = await thunkAPI.dispatch(renewToken());
+
+                if (renewToken.fulfilled.match(renewTokenResult)) {
+                    try {
+                        return await dataAPI.getData();
+                    } catch (error) {
+                        return thunkAPI.rejectWithValue(handleError(error));
+                    }
+                } else {
+                    return thunkAPI.rejectWithValue({ code: errorCodes.REFRESH_TOKEN_EXPIRED });
+                }
+            }
+            else return thunkAPI.rejectWithValue(err);
         }
     }
 )

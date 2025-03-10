@@ -1,55 +1,82 @@
 import {User} from "./types.ts";
-import {LOGIN, LOGOUT} from "./authQueries.ts"
-import client from "../../../graphql/client.ts";
+import {LOGIN_MUTATION, LOGOUT_MUTATION, REGISTER_MUTATION, RENEW_TOKEN_MUTATION} from "./authQueries.ts"
+import client from "../../graphql/client.ts";
 
-export const enum authErrors {
-    WRONG_EMAIL_OR_PASSWORD,
-}
-
-interface iLoginPromise {
+export interface iLoginPayload {
     loginUser: {
-        accessToken: string | null,
-        csrfToken: string | null,
-        user: User | null,
+        accessToken: string,
+        user: User,
     }
 }
 
-const login = async (email?: string, password?: string): Promise<iLoginPromise> => {
-    try {
-        const response = await client.mutate<iLoginPromise>({
-            mutation: LOGIN,
-            variables: {
-                email: email,
-                password: password,
-            }
-        })
+const login = async (email?: string, password?: string): Promise<iLoginPayload> => {
+    const response = await client.mutate<iLoginPayload>({
+        mutation: LOGIN_MUTATION,
+        variables: {
+            email,
+            password,
+        },
+        context: {
+            credentials: 'include'
+        }
+    })
 
-        return response.data!;
-    } catch (error) {
-        console.error('Ошибка авторизации', error);
-        // throw error;
-        return Promise.reject(error);
-    }
+    return response.data!;
 }
 
-interface iLogoutPromise {
+export interface iLogoutPayload {
     logoutUser: boolean,
 }
 
-const logout = async (): Promise<iLogoutPromise> => {
-    try {
-        const response = await client.mutate<iLogoutPromise>({
-            mutation: LOGOUT,
-        })
+const logout = async (): Promise<iLogoutPayload> => {
+    const response = await client.mutate<iLogoutPayload>({
+        mutation: LOGOUT_MUTATION,
+    })
 
-        return response.data!;
-    } catch (error) {
-        console.error('Ошибка выхода', error);
-        throw error;
+    return response.data!;
+
+}
+
+export type iRegisterPayload = {
+    registerUser: {
+        accessToken: string,
+        user: User,
     }
+};
+
+const register = async (args: {email: string, username: string, password: string}): Promise<iRegisterPayload> => {
+    const response = await client.mutate<iRegisterPayload>({
+        mutation: REGISTER_MUTATION,
+        variables: args,
+        context: {
+            credentials: 'include'
+        }
+    })
+
+    return response.data!;
+}
+
+export type iRenewTokenPayload = {
+    renewAccessToken: {
+        accessToken: string,
+        user: User,
+    }
+}
+
+export const renewToken = async (): Promise<iRenewTokenPayload> => {
+    const response = await client.mutate<iRenewTokenPayload>({
+        mutation: RENEW_TOKEN_MUTATION,
+        context: {
+            credentials: 'include'
+        }
+    })
+
+    return response.data!;
 }
 
 export const authAPI = {
     login,
+    register,
     logout,
+    renewToken,
 }

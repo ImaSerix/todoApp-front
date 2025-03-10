@@ -6,7 +6,6 @@ export type Todo = {
     title: string,
     colorId:string,
     userId:string,
-    taskIds: string[],
 }
 
 export type Task = {

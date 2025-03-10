@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import ErrorWithCode from "../../../app/ErrorWithCode.ts";
+import ErrorWithCode from "../../../app/utils/ErrorWithCode.ts";
 import {v4 as uuidv4} from "uuid";
 import {RootState} from "../../../app/redux/store.ts";
 import loadData from "../../../app/redux/loadData.ts";
@@ -10,7 +10,6 @@ export interface iTodo {
     id: string,
     title: string,
     colorId: string,
-    //taskIds: string[], todo Ну в общем это я убрал наверное откажусь от этого вообще
 }
 
 interface iTodoState {
@@ -83,7 +82,6 @@ const todoSlice = createSlice({
             const todo = state.byId[action.payload.id];
             if (!todo) throw new ErrorWithCode<todoSliceErrors>(`No such todo with id: '${action.payload.id}'`, todoSliceErrors.NO_SUCH_TODO);
 
-            // Todo Надо добавить проверку на пустоту title, вероятно имеет смысл это сделать именно в компонентах
             if (!state.updated.includes(action.payload.id)) state.updated.push(action.payload.id);
             todo.title = action.payload.title;
         },
@@ -150,21 +148,6 @@ const todoSlice = createSlice({
             if (!state.updated.includes(action.payload.id)) state.updated.push(action.payload.id);
             todo.colorId = action.payload.colorId;
         },
-        /** todo Write docs
-         *
-         * @param state
-         * @param action
-         */
-        // removeTaskFromTodo(state: iTodoState, action: PayloadAction<{ todoId: string, taskId: string }>): void {
-        //     const todo = state.byId[action.payload.todoId];
-        //     if (!todo) throw new ErrorWithCode(`No such todo with id: '${action.payload.todoId}'`, todoSliceErrors.NO_SUCH_TODO);
-        //
-        //     const indexOfTask = todo.taskIds.indexOf(action.payload.taskId);
-        //     if (indexOfTask !== -1) {
-        //         todo.taskIds[indexOfTask] = todo.taskIds[todo.taskIds.length - 1]
-        //         todo.taskIds.pop();
-        //     }
-        // },
     },
     extraReducers: builder => {
         builder.addCase(loadData.pending, (state) => {
@@ -178,10 +161,9 @@ const todoSlice = createSlice({
             state.updated = [];
             state.deleted = [];
 
-            const todosData = action.payload!.todos;
+            const todosData = action.payload.todos;
 
             todosData.forEach(todo => {
-                //state.byId[todo.id] = {...todo, taskIds: todo.taskIds};
                 state.byId[todo.id] = todo;
                 state.allIds.push(todo.id);
             })

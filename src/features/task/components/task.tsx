@@ -3,16 +3,12 @@ import {useAppSelector} from "../../../hooks.ts";
 import {iTaskHandlers} from "./taskList.tsx";
 import {useCallback, useEffect, useState} from "react";
 
-//  Todo - оформить
 
 interface iTaskProps {
     taskId: string,
     taskHandlers: iTaskHandlers,
     isEditable: boolean,
 }
-
-//Todo  - возможно запретить в editMode менять статус задания
-//      - нужна проверка заполненности, не знаю, где её реализовать тут или в Slicer, но нельзя разрешать оставлять пустым
 
 const Task = ({taskId, taskHandlers, isEditable}: iTaskProps) => {
 
@@ -27,7 +23,6 @@ const Task = ({taskId, taskHandlers, isEditable}: iTaskProps) => {
         if (!isEditable && task.content !== content) taskHandlers.handleContentChange(content);
     }, [content, isEditable, task.content, taskHandlers]);
 
-    //Todo надо что-то сделать со структурой HTML, так как тут теги делают то (по названию), что не должны
 
     return <div className={'task'}>
         <p className={'task__text'} onInput={handleContentChange}

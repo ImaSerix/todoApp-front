@@ -1,0 +1,68 @@
+
+.authenticationForms{
+    padding: 5px;
+}
+
+.authForm{
+    padding: 5px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid gray;
+    display: flex;
+    flex-direction: column;
+    &__title{
+        margin:0;
+        margin-bottom: 5px;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    & label{
+        margin: 5px;
+        & input{
+            margin-left: 5px;
+        }
+    }
+    &__button-login{
+        width: 100px;
+        padding: 5px;
+        background: lightgray;
+        border-radius: 5px;
+        border: none;
+        transition-duration: 0.25s;
+    }
+    &__button-login:hover{
+        cursor: pointer;
+        background: #9b9b9b;
+    }
+}
+
+.registerForm{
+    padding: 5px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid gray;
+    display: flex;
+    flex-direction: column;
+    &__title{
+        margin:0;
+        margin-bottom: 5px;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    & label{
+        margin: 5px;
+        & input{
+            margin-left: 5px;
+        }
+    }
+    &__button-register{
+        width: 100px;
+        padding: 5px;
+        background: lightgray;
+        border-radius: 5px;
+        border: none;
+        transition-duration: 0.25s;
+    }
+    &__button-register:hover{
+        cursor: pointer;
+        background: #9b9b9b;
+    }
+}
